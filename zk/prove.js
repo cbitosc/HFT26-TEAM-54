@@ -113,9 +113,14 @@ async function main() {
 
   // 5. Prove, then verify locally.
   let proof, publicSignals;
+  // circom_runtime prints the raw wasm assert text with console.error; the same
+  // text is in the thrown error, so mute it here and report the failure ourselves.
+  const realConsoleError = console.error;
+  console.error = () => {};
   try {
     ({ proof, publicSignals } = await snarkjs.groth16.fullProve(input, WASM, ZKEY));
   } catch (e) {
+    console.error = realConsoleError;
     // 8. Witness generation failed: say why if it is the scores.
     const s = evMetrics.map(scoreOf);
     if (!(s[0] < s[1] && s[1] < s[2])) {
@@ -123,6 +128,8 @@ async function main() {
       process.exit(1);
     }
     return fail(`witness generation failed: ${String(e.message).split("\n").slice(0, 3).join(" | ")}`);
+  } finally {
+    console.error = realConsoleError;
   }
 
   const vkey = JSON.parse(fs.readFileSync(VKEY, "utf8"));
