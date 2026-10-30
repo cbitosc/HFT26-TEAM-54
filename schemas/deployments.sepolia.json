@@ -1,0 +1,10 @@
+{
+  "chain": "sepolia",
+  "chain_id": 11155111,
+  "registry": "0xF97417eccD3ab2Db4F9787Aba3b4713e082d61D9",
+  "verifier": "0xC3add50f96616Ca68bC93FD7ddaEA280c6DaEf3c",
+  "evaluator": "0xeC9D569DE0e5e7F671396a2B95200EC722fbb5D0",
+  "deploy_block": 12029346,
+  "reward_wei": "1000000000000000",
+  "explorer": "https://sepolia.etherscan.io"
+}
