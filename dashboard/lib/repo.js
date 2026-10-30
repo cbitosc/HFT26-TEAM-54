@@ -51,6 +51,22 @@ function parseRunId(id) {
 }
 
 // Each run folder is { id, source, dir }. Examples are used only while no real run exists.
+// A run folder is t<task>-<YYYYMMDD>-<HHMMSS>-<A|B> (PLAN.md 3.3).
+const RUN_ID = /^t\d+-\d{8}-\d{6}-[AB]$/;
+
+// A real run has a valid run.json (an object with a versions array), OR it is still in progress:
+// no run.json yet, but events.jsonl has at least one valid line. Anything else is not a run.
+function looksLikeRun(dir) {
+  const runFile = path.join(dir, "run.json");
+  if (fs.existsSync(runFile)) {
+    const run = readJson(runFile);
+    // run.json can be half-written while the agent saves it; an in-progress run is still shown
+    // if it already has events.
+    if (run) return typeof run === "object" && Array.isArray(run.versions);
+  }
+  return readJsonl(path.join(dir, "events.jsonl")).length > 0;
+}
+
 function runFolders() {
   const found = [];
   for (const source of SOURCES) {
@@ -62,7 +78,12 @@ function runFolders() {
       continue;
     }
     for (const name of names) {
-      if (SAFE_ID.test(name)) found.push({ id: name, source, dir: path.join(base, name) });
+      // Only real runs: cheat-* fixtures, scratch folders and half-made folders are skipped.
+      const dir = path.join(base, name);
+      if (!RUN_ID.test(name) || !looksLikeRun(dir)) continue;
+      // The same run can be in runs/ and backup/: show it once, preferring runs/ (SOURCES order).
+      if (found.some((f) => f.id === name)) continue;
+      found.push({ id: name, source, dir });
     }
   }
   return found;
@@ -141,9 +162,15 @@ function summarise(r) {
 }
 
 export function listRuns() {
-  return allFolders()
-    .map((f) => summarise(loadFolder(f)))
-    .sort((a, b) => b.updated - a.updated);
+  const rows = [];
+  for (const f of allFolders()) {
+    try {
+      rows.push(summarise(loadFolder(f)));
+    } catch (e) {
+      console.warn(`dashboard: skipping run folder ${f.id}: ${e.message}`);
+    }
+  }
+  return rows.sort((a, b) => b.updated - a.updated);
 }
 
 export function getRun(id) {
