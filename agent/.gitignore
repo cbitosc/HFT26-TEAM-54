@@ -1,0 +1,4 @@
+# Never commit: cached LLM responses and the SECRET system prompt.
+.cache/
+prompts/system_prompt.txt
+__pycache__/

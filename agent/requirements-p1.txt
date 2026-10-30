@@ -1,0 +1,10 @@
+# P1 (agent/ evaluator/) dependencies. P3: please merge these into the root requirements.txt.
+# ruff and radon are PINNED on purpose: the lint and simplicity metrics must be identical on every
+# laptop, because P2's attest/sign.py re-runs evaluate() and signs the result.
+openai==3.41.0
+python-dotenv==1.2.4
+eth-utils==6.0.0
+eth-hash[pycryptodome]==0.8.0
+eth-abi==6.0.0
+ruff==0.17.3
+radon==6.0.1
