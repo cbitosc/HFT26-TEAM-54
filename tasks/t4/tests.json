@@ -1,0 +1,23 @@
+{
+  "task_id": 4,
+  "family": "log_parsing",
+  "function_name": "filter_by_level",
+  "cases": [
+    {"id": "core_1", "category": "core", "args": ["2024-07-01 08:00:00 [INFO] a\n2024-07-01 08:00:01 [ERROR] b", "ERROR"], "expected": ["b"]},
+    {"id": "core_2", "category": "core", "args": ["2024-07-01 08:00:00 [DEBUG] a\n2024-07-01 08:00:01 [INFO] b\n2024-07-01 08:00:02 [WARN] c", "INFO"], "expected": ["b", "c"]},
+    {"id": "core_3", "category": "core", "args": ["2024-07-01 08:00:00 [DEBUG] a\n2024-07-01 08:00:01 [CRITICAL] b", "DEBUG"], "expected": ["a", "b"]},
+    {"id": "core_4", "category": "core", "args": ["2024-07-01 08:00:00 [INFO] a\n2024-07-01 08:00:01 [WARN] b", "CRITICAL"], "expected": []},
+    {"id": "core_5", "category": "core", "args": ["2024-07-01 08:00:00 [ERROR] x\n2024-07-01 08:00:01 [INFO] y\n2024-07-01 08:00:02 [CRITICAL] z", "ERROR"], "expected": ["x", "z"]},
+    {"id": "core_6", "category": "core", "args": ["2024-07-01 08:00:00 [WARN] température élevée 🔥", "WARN"], "expected": ["température élevée 🔥"]},
+    {"id": "core_7", "category": "core", "args": ["garbage line\n2024-07-01 08:00:00 [ERROR] real", "INFO"], "expected": ["real"]},
+    {"id": "core_8", "category": "core", "args": ["2024-07-01 08:00:00 [INFO] disk at 50%", "INFO"], "expected": ["disk at 50%"]},
+    {"id": "edge_1", "category": "edge", "args": ["", "INFO"], "expected": []},
+    {"id": "edge_2", "category": "edge", "args": ["2024-07-01 08:00:00 [INFO] a\n2024-07-01 08:00:01 [ERROR] b", "  error \n"], "expected": ["b"]},
+    {"id": "edge_3", "category": "edge", "args": ["2024-07-01 08:00:00 [Warning] a\n2024-07-01 08:00:01 [INFO] b\n2024-07-01 08:00:02 [warn] c", "warning"], "expected": ["a", "c"]},
+    {"id": "edge_4", "category": "edge", "args": ["2024-07-01 08:00:00 [ERROR] a", "VERBOSE"], "expected": []},
+    {"id": "edge_5", "category": "edge", "args": ["2024-07-01 08:00:00 [ error ]   spaced  out  \r\n2024-07-01 08:00:01 [INFO] b\r\n", "WARN"], "expected": ["spaced  out"]},
+    {"id": "edge_6", "category": "edge", "args": ["2024-07-01 08:00:00 [ERROR]\n2024-07-01 08:00:01 [ERROR] b", "ERROR"], "expected": ["", "b"]},
+    {"id": "edge_7", "category": "edge", "args": ["2024-07-01 99:00:00 [ERROR] bad\n2024-07-01 08:00:01 [FATAL] unknown\n2024-07-01 08:00:02 [ERROR] good", "DEBUG"], "expected": ["good"]},
+    {"id": "edge_8", "category": "edge", "args": ["\t2024-07-01\t08:00:00\t[CRITICAL]\tdown [db] now\t", "error"], "expected": ["down [db] now"]}
+  ]
+}
