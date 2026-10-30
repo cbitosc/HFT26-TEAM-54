@@ -1,5 +1,5 @@
 "use client";
-// Small shared building blocks: cards, badges, formatting helpers.
+// Small shared building blocks (neumorphic): cards, badges, buttons, formatting helpers.
 import { useEffect, useState } from "react";
 
 export const METRIC_NAMES = ["tests_passed", "edge_cases", "lint", "simplicity"];
@@ -32,35 +32,35 @@ export function usePoll(url, ms = 3000) {
 
 export function Card({ title, right, children, className = "" }) {
   return (
-    <section
-      className={`rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 ${className}`}
-    >
+    <section className={`neu-card ${className}`}>
       {title && (
-        <header className="flex items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800">
-          <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
+        <header className="flex items-center justify-between gap-3 px-6 pt-5 pb-1">
+          <h2 className="text-sm font-semibold tracking-tight text-gray-800 dark:text-gray-100">{title}</h2>
           {right}
         </header>
       )}
-      <div className="p-4">{children}</div>
+      <div className="p-6 pt-4">{children}</div>
     </section>
   );
 }
 
-const TONES = {
-  green: "bg-emerald-100 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300",
-  red: "bg-red-100 text-red-800 ring-red-600/20 dark:bg-red-500/15 dark:text-red-300",
-  amber: "bg-amber-100 text-amber-800 ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-300",
-  blue: "bg-blue-100 text-blue-800 ring-blue-600/20 dark:bg-blue-500/15 dark:text-blue-300",
-  violet: "bg-violet-100 text-violet-800 ring-violet-600/20 dark:bg-violet-500/15 dark:text-violet-300",
-  gray: "bg-zinc-100 text-zinc-700 ring-zinc-500/20 dark:bg-zinc-800 dark:text-zinc-300",
+// Accent colour per tone (the dot); the text stays in readable ink.
+export const TONE_COLOR = {
+  green: "var(--accent-teal)",
+  red: "var(--accent-red)",
+  amber: "var(--accent-yellow)",
+  blue: "var(--accent)",
+  violet: "var(--accent)",
+  gray: "var(--neu-dark)",
 };
 
 export function Badge({ tone = "gray", children, title }) {
   return (
     <span
       title={title}
-      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${TONES[tone]}`}
+      className="neu-inset inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-200"
     >
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: TONE_COLOR[tone] }} />
       {children}
     </span>
   );
@@ -78,6 +78,20 @@ export const STATUS_TONE = {
 export function StatusBadge({ status }) {
   const label = { failed_no_improvement: "no improvement", too_easy: "too easy" }[status] || status;
   return <Badge tone={STATUS_TONE[status] || "gray"}>{label}</Badge>;
+}
+
+// A neumorphic toggle button: raised normally, pressed when active.
+export function NeuButton({ active, className = "", children, ...props }) {
+  return (
+    <button
+      {...props}
+      className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+        active ? "neu-inset text-[var(--ink-violet)]" : "neu-btn text-gray-700 dark:text-gray-200"
+      } ${className}`}
+    >
+      {children}
+    </button>
+  );
 }
 
 export function short(s, head = 6, tail = 4) {
@@ -111,7 +125,7 @@ export function ExtLink({ href, children }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-medium text-blue-700 underline decoration-blue-700/30 underline-offset-2 hover:decoration-blue-700 dark:text-blue-400 dark:decoration-blue-400/30"
+      className="font-medium text-[var(--ink-violet)] underline decoration-[var(--accent)]/30 underline-offset-2 hover:decoration-[var(--accent)]"
     >
       {children}
     </a>
@@ -120,13 +134,22 @@ export function ExtLink({ href, children }) {
 
 export function Spinner({ className = "h-3 w-3" }) {
   return (
-    <span
-      aria-label="working"
-      className={`inline-block shrink-0 animate-spin rounded-full border-2 border-blue-500 border-t-transparent ${className}`}
-    />
+    <svg viewBox="0 0 24 24" aria-label="working" className={`shrink-0 animate-spin ${className}`}>
+      <circle cx="12" cy="12" r="9" fill="none" stroke="var(--neu-dark)" strokeWidth="3" />
+      <path d="M12 3a9 9 0 0 1 9 9" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
+    </svg>
   );
 }
 
 export function Empty({ children }) {
-  return <p className="text-sm text-zinc-500 dark:text-zinc-400">{children}</p>;
+  return <p className="text-sm text-gray-500 dark:text-gray-400">{children}</p>;
+}
+
+// A recessed panel (for logs, tables, code).
+export function Well({ className = "", children, ...props }) {
+  return (
+    <div {...props} className={`neu-inset rounded-xl p-3 ${className}`}>
+      {children}
+    </div>
+  );
 }

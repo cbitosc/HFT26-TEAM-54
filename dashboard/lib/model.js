@@ -38,9 +38,9 @@ export function deriveVersions(detail) {
     versions.push({
       v: n,
       status,
-      score: fromRun?.score ?? (accepted ? last?.score : null),
-      metrics: fromRun?.metrics ?? (accepted ? last?.metrics : null),
-      failed_cases: fromRun?.failed_cases ?? (accepted ? last?.failed : []),
+      score: fromRun?.score ?? (accepted ? last?.score : null) ?? null,
+      metrics: Array.isArray(fromRun?.metrics) ? fromRun.metrics : accepted ? (last?.metrics ?? null) : null,
+      failed_cases: fromRun?.failed_cases ?? (accepted ? last?.failed : null) ?? [],
       critique: fromRun?.critique ?? "",
       code: fromRun?.code ?? null,
       retries,
@@ -76,6 +76,11 @@ export function deriveSteps(detail) {
   let firstOpen = true;
   for (const s of steps) {
     s.event = [...events].reverse().find((e) => e.step === s.key || (s.key === "submit" && e.step === "verified"));
+    if (detail.source === "example") {
+      s.status = "skipped"; // schemas/examples has a fake receipt; never draw it as done
+      s.error = "example data, not real";
+      continue;
+    }
     if (s.done) {
       s.status = "done";
       continue;

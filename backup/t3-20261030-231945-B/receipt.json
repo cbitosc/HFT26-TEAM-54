@@ -1,0 +1,10 @@
+{
+  "cid": "bafkreieyly5jei37m24boalkv3xe2e7qxt43hyiapqyauk4ybs5tfijgbi",
+  "tx_hash": "0x5b6812d07cdd676a89df14e507671cd15e16bed05d18fd8329e0a517b0d78559",
+  "block": 12029974,
+  "record_id": 1,
+  "reward_wei": "1000000000000000",
+  "chain_id": 11155111,
+  "explorer_tx_url": "https://sepolia.etherscan.io/tx/0x5b6812d07cdd676a89df14e507671cd15e16bed05d18fd8329e0a517b0d78559",
+  "ipfs_url": "https://amaranth-written-grasshopper-896.mypinata.cloud/ipfs/bafkreieyly5jei37m24boalkv3xe2e7qxt43hyiapqyauk4ybs5tfijgbi"
+}

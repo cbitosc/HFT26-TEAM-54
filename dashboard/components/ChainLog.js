@@ -32,9 +32,9 @@ export default function ChainLog({ chain }) {
       {!chain.records.length ? (
         <Empty>No verified records yet. The first successful submit() will appear here.</Empty>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="neu-inset overflow-x-auto rounded-xl p-3">
+          <table className="w-full text-left text-sm text-gray-700 dark:text-gray-200">
+            <thead className="text-xs text-gray-500 dark:text-gray-400">
               <tr>
                 <th className="py-1.5 pr-3 font-medium">Record</th>
                 <th className="py-1.5 pr-3 font-medium">Task</th>
@@ -45,7 +45,7 @@ export default function ChainLog({ chain }) {
                 <th className="py-1.5 font-medium">Tx</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <tbody>
               {chain.records.map((r) => (
                 <tr key={r.record_id}>
                   <td className="py-1.5 pr-3 font-semibold">#{r.record_id}</td>

@@ -3,24 +3,217 @@
 /* Dark mode follows the "dark" class on <html> (set by the theme toggle), not only the OS. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ---------- Neumorphism tokens (light values = the team style guide; dark = same recipe, dark surface) */
 :root {
   color-scheme: light;
-  --with-memory: #2a78d6;
-  --without-memory: #a3a29d;
+  --neu-bg: #e0e5ec;
+  --neu-dark: #b8bcc2;
+  --neu-light: #ffffff;
+  --accent: #6d5dfc; /* violet: primary / running */
+  --accent-red: #ff6b6b; /* rejected / error */
+  --accent-teal: #4ecdc4; /* done / verified */
+  --accent-yellow: #ffe66d; /* example / warning */
+  --ink-teal: #138a80; /* readable text versions of the accents on --neu-bg */
+  --ink-red: #d63c3c;
+  --ink-violet: #5546e0;
+  --ink-yellow: #8a6d00;
+  --with-memory: #6d5dfc;
+  --without-memory: #a3a8b0;
 }
 .dark {
   color-scheme: dark;
-  --with-memory: #3987e5;
-  --without-memory: #6f6e69;
+  --neu-bg: #2a2e35;
+  --neu-dark: #1e2126;
+  --neu-light: #363b44;
+  --accent: #8b7ffd;
+  --ink-teal: #5fd8cf;
+  --ink-red: #ff8a8a;
+  --ink-violet: #a99fff;
+  --ink-yellow: #ffe66d;
+  --with-memory: #8b7ffd;
+  --without-memory: #6b7079;
 }
 
 body {
+  background-color: var(--neu-bg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* React Flow: let our Tailwind node cards define the look. */
+/* Raised card: rounded-2xl + 8px dual shadow */
+@utility neu-card {
+  background-color: var(--neu-bg);
+  border-radius: 1rem;
+  box-shadow: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
+}
+@utility neu-raised {
+  background-color: var(--neu-bg);
+  box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+}
+@utility neu-raised-sm {
+  background-color: var(--neu-bg);
+  box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
+}
+/* Pressed / recessed wells */
+@utility neu-inset {
+  background-color: var(--neu-bg);
+  box-shadow: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
+}
+@utility neu-inset-lg {
+  background-color: var(--neu-bg);
+  box-shadow: inset 8px 8px 16px var(--neu-dark), inset -8px -8px 16px var(--neu-light);
+}
+/* Button: raised 6px, hover 4px, active pressed, transition-all 200ms */
+@utility neu-btn {
+  background-color: var(--neu-bg);
+  border-radius: 0.75rem;
+  box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+  transition: all 200ms;
+  &:hover {
+    box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
+  }
+  &:active {
+    box-shadow: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
+  }
+}
+
+/* ---------- React Flow: our neumorphic node cards define the look; the canvas is a recessed well */
+.react-flow {
+  --xy-background-color: transparent !important;
+}
 .react-flow__node-step {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+/* ---------- Execution tree "road map" animations */
+@keyframes node-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes node-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes node-glow {
+  0%,
+  100% {
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light), 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light),
+      0 0 0 5px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+}
+@keyframes node-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+@keyframes road-flow {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+@keyframes bar-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.tree-node {
+  animation: node-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+.node-done {
+  animation: node-pop 0.45s ease-out;
+}
+.node-running {
+  animation: node-glow 1.6s ease-in-out infinite;
+}
+.node-rejected {
+  animation: node-shake 0.4s ease-in-out 2;
+}
+
+/* The "road": a recessed bed with a coloured lane on top */
+.road-bed {
+  fill: none;
+  stroke: var(--neu-dark);
+  stroke-width: 8;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.road-lane {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.road-done {
+  stroke: var(--accent-teal);
+  stroke-dasharray: 10 8;
+  animation: road-flow 1.6s linear infinite;
+}
+.road-active {
+  stroke: var(--accent);
+  stroke-dasharray: 10 8;
+  animation: road-flow 0.6s linear infinite;
+}
+.road-pending {
+  stroke: var(--neu-light);
+  stroke-dasharray: 2 9;
+}
+.road-rejected {
+  stroke: var(--accent-red);
+  stroke-dasharray: 4 6;
+}
+.road-dot {
+  fill: var(--accent);
+}
+.road-dot-done {
+  fill: var(--accent-teal);
+}
+
+/* Progress bar fill breathes while the run is still going (solid colour, no gradient) */
+.progress-live {
+  animation: bar-pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-node,
+  .node-done,
+  .node-running,
+  .node-rejected,
+  .road-done,
+  .road-active,
+  .progress-live {
+    animation: none !important;
+  }
+  .road-dot,
+  .road-dot-done {
+    display: none;
+  }
 }

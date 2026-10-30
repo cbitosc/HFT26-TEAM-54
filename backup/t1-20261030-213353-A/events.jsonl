@@ -1,0 +1,20 @@
+{"ts": "2026-10-30T21:33:53Z", "actor": "agent", "step": "generate", "v": null, "score": null, "msg": "run t1-20261030-213353-A started: task 1, agent A, Qwen/Qwen2.5-Coder-32B-Instruct, 0 memory lessons"}
+{"ts": "2026-10-30T21:33:53Z", "actor": "agent", "step": "generate", "v": 1, "score": null, "msg": "code written (199 tokens, cached=True)"}
+{"ts": "2026-10-30T21:33:56Z", "actor": "evaluator", "step": "evaluate", "v": 1, "score": 4150, "msg": "metrics [25, 25, 60, 100] failed ['core_1', 'core_2', 'core_3', 'core_4', 'core_5', 'core_6', 'edge_2', 'edge_3', 'edge_4', 'edge_5', 'edge_7', 'edge_8']"}
+{"ts": "2026-10-30T21:33:56Z", "actor": "agent", "step": "critique", "v": 1, "score": null, "msg": "deepseek-ai/DeepSeek-R1-0528 is reviewing V1 (a reasoning model: this can take several minutes)"}
+{"ts": "2026-10-30T21:33:56Z", "actor": "agent", "step": "critique", "v": 1, "score": null, "msg": "The code fails due to two main issues:\n\n1. **Regex capture groups**: The pattern uses a capturing group for \"ING\" in \"WARNING\", creating 5 groups instead of 4. "}
+{"ts": "2026-10-30T21:33:59Z", "actor": "evaluator", "step": "evaluate", "v": 2, "score": 8950, "msg": "attempt 1: metrics [100, 100, 40, 90] failed []"}
+{"ts": "2026-10-30T21:33:59Z", "actor": "agent", "step": "revise", "v": 2, "score": 8950, "msg": "V2: fixed core_1, core_2, core_3, core_4, core_5, core_6, edge_2, edge_3, edge_4, edge_5, edge_7, edge_8; lint 60 -> 40; simplicity 100 -> 90; score 4150 -> 8950 (+4800)"}
+{"ts": "2026-10-30T21:33:59Z", "actor": "agent", "step": "critique", "v": 2, "score": null, "msg": "deepseek-ai/DeepSeek-R1-0528 is reviewing V2 (a reasoning model: this can take several minutes)"}
+{"ts": "2026-10-30T21:33:59Z", "actor": "agent", "step": "critique", "v": 2, "score": null, "msg": "The code has two main issues:\n\n1. **Linter warnings**: Trailing whitespace on blank lines (reported on lines 9, 16, 20, 24, 27, 30). Fix by removing all trailin"}
+{"ts": "2026-10-30T21:34:02Z", "actor": "evaluator", "step": "evaluate", "v": 3, "score": 9100, "msg": "attempt 1: metrics [100, 100, 50, 90] failed []"}
+{"ts": "2026-10-30T21:34:02Z", "actor": "agent", "step": "revise", "v": 3, "score": 9100, "msg": "V3: lint 40 -> 50; score 8950 -> 9100 (+150)"}
+{"ts": "2026-10-30T21:34:02Z", "actor": "agent", "step": "lessons", "v": null, "score": null, "msg": "Ensure all regular expression groups are necessary; use non-capturing groups `(?:...)` where possible to avoid unintended side effects."}
+{"ts": "2026-10-30T21:34:02Z", "actor": "agent", "step": "lessons", "v": null, "score": null, "msg": "Always validate extracted data against specified ranges and formats immediately after parsing to catch errors early and maintain clean code."}
+{"ts": "2026-10-30T21:34:02Z", "actor": "agent", "step": "lessons", "v": null, "score": null, "msg": "Reduce function complexity by combining related checks into single conditions or helper functions, improving readability and maintainability."}
+{"ts": "2026-10-30T21:34:02Z", "actor": "agent", "step": "run_done", "v": null, "score": 9100, "msg": "status improved; scores 4150 -> 8950 -> 9100"}
+{"ts": "2026-10-30T23:00:25Z", "actor": "evaluator", "step": "sign", "v": null, "score": null, "msg": "re-ran tests for V1-V3, metrics match run.json; signed by 0xeC9D569DE0e5e7F671396a2B95200EC722fbb5D0"}
+{"ts":"2026-10-30T23:00:27Z","actor":"prover","step":"prove","v":null,"score":null,"msg":"Groth16 proof built and verified locally (16 public signals)"}
+{"ts": "2026-10-30T23:00:31Z", "actor": "pipeline", "step": "upload", "v": null, "score": null, "msg": "run.json pinned to IPFS: bafkreidqcreyvopzy4avc6me5ehgxpswjdpjtqhuldebunhrsbxotnk3km"}
+{"ts": "2026-10-30T23:00:32Z", "actor": "pipeline", "step": "submit", "v": null, "score": null, "msg": "tx sent: 0xc99167cc2d72cd2192749afc818cd1d6786c76b5cd723b74a9c165a23871c5f1"}
+{"ts": "2026-10-30T23:00:39Z", "actor": "pipeline", "step": "verified", "v": null, "score": null, "msg": "record 0 on-chain, reward 0.001 ETH paid; IPFS re-hash ok=True"}

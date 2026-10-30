@@ -2,7 +2,7 @@
 // The whole dashboard: header, tabs, and the panels. Every panel polls its API route every 3 s.
 import { useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { Badge, Card, Empty, StatusBadge, ExtLink, Spinner, short, scoreLine, usePoll } from "@/components/ui";
+import { Badge, Card, Empty, StatusBadge, ExtLink, NeuButton, Spinner, short, scoreLine, usePoll } from "@/components/ui";
 import RunList from "@/components/RunList";
 import ProofPanel from "@/components/ProofPanel";
 import ChainLog from "@/components/ChainLog";
@@ -51,29 +51,39 @@ function RunHeader({ detail }) {
   const thinking = criticThinking(detail);
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <h2 className="font-mono text-lg font-semibold">{detail.id}</h2>
+      {detail.source === "example" && (
+        <div className="neu-inset relative w-full overflow-hidden rounded-xl py-4 pl-7 pr-5">
+          <span className="absolute inset-y-3 left-2.5 w-1.5 rounded-full bg-[var(--accent-yellow)]" />
+          <div className="text-lg font-extrabold tracking-wide text-[var(--ink-yellow)]">EXAMPLE DATA, not a real run</div>
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            No real runs found in runs/ or backup/, so this shows schemas/examples/. The proof, signature and
+            transaction are placeholders: nothing here was verified or paid.
+          </div>
+        </div>
+      )}
+      <h2 className="font-mono text-lg font-semibold text-gray-800 dark:text-gray-100">{detail.id}</h2>
       <StatusBadge status={run?.status || (isLive(detail) ? "running" : "empty")} />
-      {isLive(detail) && !detail.receipt && <Badge tone="blue">● live</Badge>}
+      {isLive(detail) && !detail.receipt && <Badge tone="blue">live</Badge>}
       {detail.source !== "runs" && <Badge tone="amber">from {detail.source}/</Badge>}
       {run && (
-        <span className="text-sm text-zinc-500 dark:text-zinc-400">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           Task {run.task_id} ({run.task_family}) · Agent {run.agent}{" "}
           <span className="font-mono">{short(run.agent_wallet, 6, 4)}</span> · {run.models?.generator} + critic{" "}
           {run.models?.critic}
         </span>
       )}
       {run?.versions?.length > 0 && (
-        <span className="ml-auto font-mono text-lg font-bold tabular-nums">
+        <span className="ml-auto font-mono text-lg font-bold tabular-nums text-gray-800 dark:text-gray-100">
           {scoreLine(run.versions.map((v) => v.score))}
         </span>
       )}
       {thinking && (
-        <div className="flex w-full items-center gap-2.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-sm dark:border-blue-800 dark:bg-blue-950/50">
+        <div className="neu-inset flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
           <Spinner className="h-4 w-4" />
           <span>
             <span className="font-semibold">{thinking.model}</span> is reviewing the failures of V{thinking.v} ·{" "}
             <span className="font-mono tabular-nums">{elapsed(thinking.since)}</span>
-            <span className="text-zinc-500 dark:text-zinc-400"> · reasoning models can take several minutes; not stuck</span>
+            <span className="text-gray-500 dark:text-gray-400"> · reasoning models can take several minutes; not stuck</span>
           </span>
         </div>
       )}
@@ -85,21 +95,32 @@ function RunsTab({ runs, selected, onSelect, follow, setFollow, dark }) {
   const { data: detail, error } = usePoll(selected ? `/api/runs/${selected}` : null);
   const current = detail && detail.id === selected ? detail : null;
   return (
-    <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
       <Card
         title="Runs"
         right={
-          <label className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-            <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />
+          <button
+            role="switch"
+            aria-checked={follow}
+            onClick={() => setFollow(!follow)}
+            className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"
+          >
             follow latest
-          </label>
+            <span className="neu-inset relative h-5 w-9 rounded-full">
+              <span
+                className={`neu-raised-sm absolute top-0.5 h-4 w-4 rounded-full transition-all duration-200 ${
+                  follow ? "left-[18px] !bg-[var(--accent)]" : "left-0.5"
+                }`}
+              />
+            </span>
+          </button>
         }
         className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-7rem)] lg:overflow-auto"
       >
         <RunList runs={runs} selected={selected} onSelect={onSelect} />
       </Card>
 
-      <div className="min-w-0 space-y-4">
+      <div className="min-w-0 space-y-8">
         {!current ? (
           <Card>
             <Empty>{error || (selected ? "Loading run…" : "Pick a run on the left.")}</Empty>
@@ -163,23 +184,23 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="mx-auto max-w-[1500px] px-4 py-4">
-      <header className="mb-4 flex flex-wrap items-center gap-3">
+    <div className="mx-auto max-w-[1500px] px-6 py-8 md:px-8">
+      <header className="mb-8 flex flex-wrap items-center gap-4 md:gap-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">AutoEvolve Protocol</h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-800 md:text-3xl dark:text-gray-100">AutoEvolve Protocol</h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
             Self-improving code agents · ZK-proven improvement · on-chain memory
           </p>
         </div>
-        <nav className="ml-0 flex flex-wrap gap-1 rounded-lg bg-zinc-200/60 p-1 sm:ml-6 dark:bg-zinc-800/60">
+        <nav className="neu-inset flex flex-wrap gap-1.5 rounded-2xl p-1.5">
           {TABS.map(([key, label]) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+              className={`rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
                 tab === key
-                  ? "bg-white shadow-sm dark:bg-zinc-950"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  ? "neu-raised-sm text-[var(--ink-violet)]"
+                  : "text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
               }`}
             >
               {label}
@@ -193,14 +214,10 @@ export default function Dashboard() {
               {chain.ok ? `${chain.chain} · ${chain.record_count} records` : `chain offline (${chain.chain})`}
             </Badge>
           )}
-          <Badge tone={runsError ? "red" : "green"}>{runsError ? "disconnected" : "● live · 3 s"}</Badge>
-          <button
-            onClick={toggleTheme}
-            className="rounded-md border border-zinc-300 px-2 py-1 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-            aria-label="Toggle light or dark mode"
-          >
+          <Badge tone={runsError ? "red" : "green"}>{runsError ? "disconnected" : "live · 3 s"}</Badge>
+          <NeuButton onClick={toggleTheme} aria-label="Toggle light or dark mode" className="text-xs">
             {dark ? "☀ Light" : "☾ Dark"}
-          </button>
+          </NeuButton>
         </div>
       </header>
 
@@ -209,9 +226,9 @@ export default function Dashboard() {
       )}
       {tab === "chain" && <ChainLog chain={chain} />}
       {tab === "bench" && <BenchmarkChart benchmark={extras?.benchmark} />}
-      {tab === "cheats" && <CheatsTable cheats={extras?.cheats} />}
+      {tab === "cheats" && <CheatsTable cheats={extras?.cheats} events={extras?.cheat_events} />}
 
-      <footer className="mt-6 text-center text-xs text-zinc-400">
+      <footer className="mt-10 text-center text-xs text-gray-400">
         Reads runs/, backup/ and schemas/ from the repo
         {chain?.ok && chain.explorer && (
           <>
