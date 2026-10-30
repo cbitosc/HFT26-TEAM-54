@@ -36,7 +36,9 @@ def memory_block(lessons: list) -> str:
     if not lessons:
         return ""
     body = "\n".join(f"- {text}" for text in lessons)
-    return f"\n\n<CRITICAL_ADVICE_FROM_PAST_RUNS>\n{body}\n</CRITICAL_ADVICE_FROM_PAST_RUNS>"
+    note = ("These are general hints from earlier agents on similar tasks. They may not fit this task "
+            "exactly: the SPEC above always wins, and the code must still be correct, valid Python.")
+    return f"\n\n<CRITICAL_ADVICE_FROM_PAST_RUNS>\n{note}\n{body}\n</CRITICAL_ADVICE_FROM_PAST_RUNS>"
 
 
 def generate(spec: str, lessons: list) -> str:
