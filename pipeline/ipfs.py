@@ -10,7 +10,8 @@ import requests
 from common import config  # noqa: F401  (loads .env)
 
 PIN_FILE_URL = "https://api.pinata.cloud/pinning/pinFileToIPFS"
-PUBLIC_GATEWAYS = ["https://ipfs.io/ipfs/", "https://dweb.link/ipfs/"]
+# ipfs.io rate-limits (HTTP 429) under load, so it is not first.
+PUBLIC_GATEWAYS = ["https://gateway.pinata.cloud/ipfs/", "https://w3s.link/ipfs/", "https://ipfs.io/ipfs/", "https://dweb.link/ipfs/"]
 
 
 def _jwt() -> str:
