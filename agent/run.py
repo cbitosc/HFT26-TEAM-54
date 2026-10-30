@@ -246,6 +246,9 @@ def _iterate(loop: Loop, run: dict, log) -> None:
         if current["score"] >= MAX_SCORE:
             log("error", f"V{n} already scores the maximum, so no strictly better V{n + 1} is possible", v=n)
             return
+        if not loop.mock:
+            log("critique", f"{loop.critic} is reviewing V{n} (a reasoning model: this can take several minutes)",
+                v=n)
         critique_text, fell_back = loop.critique(n, current["code"], evals[-1])
         current["critique"] = critique_text
         log("critique", ("(fallback, critic returned nothing) " if fell_back else "") + critique_text[:160],

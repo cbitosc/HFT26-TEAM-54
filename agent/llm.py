@@ -48,7 +48,8 @@ def _get_client():
         key = config.env("FEATHERLESS_API_KEY")
         if not key:
             raise LLMError("FEATHERLESS_API_KEY missing from .env (or use --mock-llm)")
-        _client = OpenAI(base_url=config.FEATHERLESS_BASE_URL, api_key=key, timeout=300, max_retries=0)
+        _client = OpenAI(base_url=config.FEATHERLESS_BASE_URL, api_key=key,
+                         timeout=config.REQUEST_TIMEOUT_SECONDS, max_retries=0)
     return _client
 
 
@@ -74,7 +75,10 @@ def _call_api(request: dict) -> dict:
             resp = _send(request)
             usage = resp.usage
             return {
+                # Only the final answer. A reasoning model's hidden thinking (a separate
+                # "reasoning" field on Featherless) is deliberately ignored.
                 "text": resp.choices[0].message.content or "",
+                "finish_reason": resp.choices[0].finish_reason,
                 "tokens": {"prompt": getattr(usage, "prompt_tokens", 0) or 0,
                            "completion": getattr(usage, "completion_tokens", 0) or 0},
                 "seed_sent": _seed_supported,
@@ -85,6 +89,8 @@ def _call_api(request: dict) -> dict:
             last = exc
             if getattr(exc, "status_code", None) in (400, 401, 403, 404):
                 break  # bad key / unknown model: retrying will not help
+            if "timeout" in type(exc).__name__.lower():
+                break  # a 15-minute timeout will not get faster on retry
             if attempt < 2:
                 time.sleep(5 * (attempt + 1))
     raise LLMError(f"Featherless call failed after 3 attempts: {type(last).__name__}: {str(last)[:300]}")
@@ -113,8 +119,9 @@ def chat(model: str, messages: list, max_tokens: int, mock: bool = False, mock_k
             out, cached = json.loads(cache_file.read_text(encoding="utf-8")), True
         else:
             out, cached = _call_api(request), False
-            config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
-            cache_file.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
+            if out["text"].strip():  # never cache an empty answer, or a re-run would replay it
+                config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+                cache_file.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
 
     return {
         "text": out["text"],

@@ -18,7 +18,10 @@ CRITIC_FALLBACK_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"  # PLAN.md fa
 TEMPERATURE = 0.0
 SEED = 42
 GENERATOR_MAX_TOKENS = 1500
-CRITIC_MAX_TOKENS = 3000
+# Measured 2026-10-30: R1-0528 used 7669 tokens (~6 min) of hidden reasoning for one critique.
+# With 3000 it ran out mid-thought and returned an empty answer.
+CRITIC_MAX_TOKENS = 12000
+REQUEST_TIMEOUT_SECONDS = 900
 
 
 def load_env() -> None:
