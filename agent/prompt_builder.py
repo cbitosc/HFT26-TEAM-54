@@ -11,7 +11,12 @@ from agent import config
 
 CRITIC_SYSTEM = (
     "You are a strict senior Python reviewer. You did not write this code. "
-    "Find why it fails the specification and say precisely how to fix it."
+    "Find why it fails the specification and say precisely how to fix it. "
+    "Keep your private reasoning brief and focused; the answer itself must be short."
+)
+STYLE_RULES = (
+    "Code style (checked by ruff): blank lines must be completely empty (no spaces), no trailing "
+    "whitespace, no unused imports or variables, one import per line."
 )
 LESSONS_SYSTEM = "You write short, general engineering lessons. Never include code."
 
@@ -36,7 +41,7 @@ def memory_block(lessons: list) -> str:
 
 def generate(spec: str, lessons: list) -> str:
     return (
-        f"Implement this task.\n\n<SPEC>\n{spec}\n</SPEC>{memory_block(lessons)}\n\n"
+        f"Implement this task.\n\n<SPEC>\n{spec}\n</SPEC>{memory_block(lessons)}\n\n{STYLE_RULES}\n\n"
         "Reply with exactly one ```python code block containing the complete module. No explanation."
     )
 
@@ -70,7 +75,7 @@ def revise(spec: str, code: str, critique_text: str, lessons: list) -> str:
         f"<SPEC>\n{spec}\n</SPEC>\n\n<CURRENT_CODE>\n{code}</CURRENT_CODE>\n\n"
         f"<REVIEW>\n{critique_text}\n</REVIEW>{memory_block(lessons)}\n\n"
         "Fix every problem in the review while keeping everything that already works. "
-        "Keep functions small and lint-clean. "
+        f"Keep functions small. {STYLE_RULES} "
         "Reply with exactly one ```python code block containing the complete corrected module."
     )
 
