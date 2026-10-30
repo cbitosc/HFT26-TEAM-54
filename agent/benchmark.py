@@ -20,11 +20,23 @@ def _quiet_log(step, msg, v=None, score=None, actor="agent"):
     print(f"  [{step}] {msg}")
 
 
+def _note(without: dict, with_mem: dict) -> str:
+    """Plain-language reason, built only from the measured data (never hand-written)."""
+    parts = []
+    for label, side in (("without memory", without), ("with memory", with_mem)):
+        if side["first_error"]:
+            parts.append(f"{label}: the generated code failed to run ({side['first_error']})")
+    parts.append("single sample at temperature 0")
+    return "; ".join(parts)
+
+
 def _v1(task_id: int, lessons: list, mock: bool, generator) -> dict:
     loop = Loop(task_id, "B", mock, lessons, generator=generator)
     code, call, _ = loop.generate_v1(_quiet_log)
     ev = evaluate(task_id, code)
+    errors = [r["error"] for r in ev["results"] if r["error"]]
     return {"metrics": ev["metrics"], "score": ev["score"], "failed_cases": ev["failed_cases"],
+            "first_error": errors[0] if errors else None,
             "tokens": call["tokens"], "code_hash": code_hash(code),
             "request_hash": call["request_hash"], "response_hash": call["response_hash"]}
 
@@ -51,7 +63,8 @@ def main():
         with_mem = _v1(task_id, lessons, args.mock_llm, args.generator)
         print(f"task {task_id}: score {without['score']} without -> {with_mem['score']} with memory "
               f"({with_mem['score'] - without['score']:+d})")
-        rows.append({"task_id": task_id, "without": without, "with": with_mem, "lessons_used": lessons})
+        rows.append({"task_id": task_id, "without": without, "with": with_mem, "lessons_used": lessons,
+                     "note": _note(without, with_mem)})
 
     n = len(rows)
     summary = {
