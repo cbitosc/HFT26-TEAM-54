@@ -226,7 +226,7 @@ export default function Dashboard() {
       )}
       {tab === "chain" && <ChainLog chain={chain} />}
       {tab === "bench" && <BenchmarkChart benchmark={extras?.benchmark} />}
-      {tab === "cheats" && <CheatsTable cheats={extras?.cheats} />}
+      {tab === "cheats" && <CheatsTable cheats={extras?.cheats} events={extras?.cheat_events} />}
 
       <footer className="mt-10 text-center text-xs text-gray-400">
         Reads runs/, backup/ and schemas/ from the repo

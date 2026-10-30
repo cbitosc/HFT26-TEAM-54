@@ -152,10 +152,15 @@ export function getRun(id) {
   return folder ? loadFolder(folder) : null;
 }
 
-// runs/benchmark.json (P1) and runs/cheats.json (P2), with backup/ as fallback.
+// runs/benchmark.json (P1), runs/cheats.json + cheats.events.jsonl (P2), with backup/ as fallback.
 export function getExtras() {
   const pick = (name) => readJson(path.join(ROOT, "runs", name)) || readJson(path.join(ROOT, "backup", name));
-  return { benchmark: pick("benchmark.json"), cheats: pick("cheats.json") };
+  const cheatEvents = readJsonl(path.join(ROOT, "runs", "cheats.events.jsonl"));
+  return {
+    benchmark: pick("benchmark.json"),
+    cheats: pick("cheats.json"),
+    cheat_events: cheatEvents.length ? cheatEvents : readJsonl(path.join(ROOT, "backup", "cheats.events.jsonl")),
+  };
 }
 
 // schemas/deployments.<CHAIN>.json (P3) and the registry ABI. Never hardcode addresses (PLAN.md 3.1).
