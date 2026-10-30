@@ -15,6 +15,8 @@ const REVERTS = [
 ];
 
 function verdict(detail) {
+  if (detail.source === "example")
+    return { tone: "amber", text: "EXAMPLE DATA: placeholder proof, no real transaction or reward" };
   if (detail.receipt) return { tone: "green", text: "Verified on-chain" };
   if (detail.run && detail.run.status !== "improved")
     return { tone: "gray", text: "Not submitted: the run did not improve, so there is nothing to prove" };
@@ -41,7 +43,8 @@ function Check({ ok, children }) {
 
 export default function ProofPanel({ detail }) {
   const v = verdict(detail);
-  const { proof, evaluator, receipt } = detail;
+  const { proof, evaluator } = detail;
+  const receipt = detail.source === "example" ? null : detail.receipt; // fake tx / reward: hide
   const pub = proof?.pubSignals || [];
   const labels = signalLabels();
 

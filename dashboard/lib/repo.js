@@ -127,11 +127,13 @@ function summarise(r) {
     status: run.status || (errored ? "error" : events.length ? "running" : "empty"),
     scores,
     uses_memory: (run.memory_used || []).length > 0,
+    example: r.source === "example",
+    // Example files contain a fake receipt: never show them as signed / proved / on-chain.
     steps: {
       run: !!r.run,
-      signed: !!r.evaluator,
-      proved: !!r.proof,
-      onchain: !!r.receipt,
+      signed: r.source !== "example" && !!r.evaluator,
+      proved: r.source !== "example" && !!r.proof,
+      onchain: r.source !== "example" && !!r.receipt,
     },
     error: errored,
     last_event: last,

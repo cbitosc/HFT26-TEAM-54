@@ -76,6 +76,11 @@ export function deriveSteps(detail) {
   let firstOpen = true;
   for (const s of steps) {
     s.event = [...events].reverse().find((e) => e.step === s.key || (s.key === "submit" && e.step === "verified"));
+    if (detail.source === "example") {
+      s.status = "skipped"; // schemas/examples has a fake receipt; never draw it as done
+      s.error = "example data, not real";
+      continue;
+    }
     if (s.done) {
       s.status = "done";
       continue;

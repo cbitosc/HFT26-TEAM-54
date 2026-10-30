@@ -51,6 +51,15 @@ function RunHeader({ detail }) {
   const thinking = criticThinking(detail);
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {detail.source === "example" && (
+        <div className="w-full rounded-lg border-2 border-amber-500 bg-amber-100 px-4 py-3 text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
+          <div className="text-lg font-extrabold tracking-wide">EXAMPLE DATA, not a real run</div>
+          <div className="text-sm">
+            No real runs found in runs/ or backup/, so this shows schemas/examples/. The proof, signature and
+            transaction are placeholders: nothing here was verified or paid.
+          </div>
+        </div>
+      )}
       <h2 className="font-mono text-lg font-semibold">{detail.id}</h2>
       <StatusBadge status={run?.status || (isLive(detail) ? "running" : "empty")} />
       {isLive(detail) && !detail.receipt && <Badge tone="blue">● live</Badge>}
