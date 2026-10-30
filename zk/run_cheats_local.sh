@@ -5,12 +5,22 @@
 # schemas/deployments.local.json and schemas/abi/AutoEvolveRegistry.json), runs the attacks, then runs
 # the read-only (testnet-style) mode once as a self-test, and on exit (success OR failure) stops Anvil
 # and restores those two tracked files with git checkout.
-# Needs DEPLOYER_PRIVATE_KEY in .env (Anvil's public account #0 key is fine) and .venv for deploy.sh.
+# ALWAYS LOCAL, whatever .env says (it may say CHAIN=sepolia): see "Force a local run" below. Needs .venv
+# and Foundry; AGENT_A_PRIVATE_KEY and EVALUATOR_PRIVATE_KEY still come from .env (chain-independent keys).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.foundry/bin:$PATH"
 TRACKED="schemas/deployments.local.json schemas/abi/AutoEvolveRegistry.json"
 RPC="http://127.0.0.1:8545"
+DEPLOY_COPY="zk/.deploy_local.sh" # temporary patched copy of pipeline/deploy.sh, removed on exit
+
+# Force a local run. dotenv and python-dotenv never override variables that are already set, so these
+# exports win for every node and python command below. The deployer is Anvil's PUBLIC account #0, derived
+# from Anvil's public test mnemonic: the team deployer key in .env is never used here.
+export CHAIN=local
+export RPC_URL="$RPC"
+DEPLOYER_PRIVATE_KEY=$(cast wallet private-key --mnemonic "test test test test test test test test test test test junk" --mnemonic-index 0)
+export DEPLOYER_PRIVATE_KEY
 
 # Guards run BEFORE the trap is armed, so refusing here never touches anyone's local edits.
 if ! git diff --quiet -- $TRACKED || ! git diff --cached --quiet -- $TRACKED; then
@@ -35,6 +45,7 @@ cleanup() {
     echo "anvil stopped"
   fi
   if [ -n "$ANVIL_LOG" ]; then rm -f "$ANVIL_LOG"; fi
+  rm -f "$DEPLOY_COPY"
   git checkout -- $TRACKED
   echo "restored: $TRACKED"
   changed=$(git status --porcelain --untracked-files=no -- schemas pipeline contracts)
@@ -59,7 +70,15 @@ done
 echo "anvil started (pid $ANVIL_PID)"
 node zk/cheat_demo.js --fund-deployer
 
-bash pipeline/deploy.sh 1 2 3 4
+# pipeline/deploy.sh re-loads .env (python-dotenv + eval export), which would OVERRIDE our exports and, for
+# CHAIN=sepolia, take its testnet branch and send real transactions. So run a temporary copy with just that
+# block removed, and refuse to continue if it is still there (e.g. deploy.sh was changed).
+awk '/^eval "\$\(\$PY - <<.EOF.$/ {skip=1} skip && /^\)"$/ {skip=0; next} !skip {print}' pipeline/deploy.sh > "$DEPLOY_COPY"
+if grep -qE 'dotenv_values|^eval ' "$DEPLOY_COPY"; then
+  echo "REFUSING: could not remove the .env loading from pipeline/deploy.sh (did it change?)." >&2
+  exit 1
+fi
+bash "$DEPLOY_COPY" 1 2 3 4
 echo
 echo "== read-only refusal check: nothing is claimed yet, so read-only mode must refuse =="
 if READ_ONLY=1 node zk/cheat_demo.js --no-write; then
