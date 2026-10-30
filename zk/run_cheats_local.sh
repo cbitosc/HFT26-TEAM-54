@@ -4,7 +4,8 @@
 # Starts Anvil, runs P3's pipeline/deploy.sh 1 2 3 4 (which rewrites the TRACKED files
 # schemas/deployments.local.json and schemas/abi/AutoEvolveRegistry.json), runs the attacks, then runs
 # the read-only (testnet-style) mode once as a self-test, and on exit (success OR failure) stops Anvil
-# and restores those two tracked files with git checkout.
+# and restores those two tracked files with git checkout (by explicit path, never a broad schemas/ checkout).
+# A guard hashes every other file under schemas/ (incl. deployments.sepolia.json) before and after and aborts if any changed.
 # ALWAYS LOCAL, whatever .env says (it may say CHAIN=sepolia): see "Force a local run" below. Needs .venv
 # and Foundry; AGENT_A_PRIVATE_KEY and EVALUATOR_PRIVATE_KEY still come from .env (chain-independent keys).
 set -euo pipefail
@@ -27,6 +28,32 @@ if ! git diff --quiet -- $TRACKED || ! git diff --cached --quiet -- $TRACKED; th
   echo "REFUSING: $TRACKED already has local changes; the restore at the end would discard them." >&2
   exit 1
 fi
+# --- schemas guard begin ---
+# Nothing under schemas/ except the two TRACKED files (restored by explicit path in the trap) may change.
+# In particular deployments.sepolia.json: post_deploy.py / deploy_web3.py write deployments.<CHAIN>.json, so a
+# wrong CHAIN would hit it. CHAIN is forced to local above; this guard proves it by hashing before and after.
+schemas_snapshot() {
+  find schemas -type f | sort \
+    | grep -vxF -e schemas/deployments.local.json -e schemas/abi/AutoEvolveRegistry.json \
+    | xargs shasum -a 256
+}
+SCHEMAS_BEFORE=$(schemas_snapshot)
+if [ -f schemas/deployments.sepolia.json ] && ! printf '%s\n' "$SCHEMAS_BEFORE" | grep -q 'deployments.sepolia.json'; then
+  echo "REFUSING: the schemas guard could not hash schemas/deployments.sepolia.json." >&2
+  exit 1
+fi
+check_schemas_untouched() {
+  local after
+  after=$(schemas_snapshot)
+  if [ "$after" != "$SCHEMAS_BEFORE" ]; then
+    echo "!!! ABORT: files under schemas/ (other than the two restored ones) CHANGED during this run:" >&2
+    diff <(printf '%s\n' "$SCHEMAS_BEFORE") <(printf '%s\n' "$after") >&2 || true
+    echo "!!! If schemas/deployments.sepolia.json is listed, restore it by hand: git checkout -- schemas/deployments.sepolia.json" >&2
+    return 1
+  fi
+  return 0
+}
+# --- schemas guard end ---
 node zk/cheat_demo.js --preflight
 if curl -s -m 2 -X POST -H 'content-type: application/json' \
      --data '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' "$RPC" >/dev/null; then
@@ -48,6 +75,11 @@ cleanup() {
   rm -f "$DEPLOY_COPY"
   git checkout -- $TRACKED
   echo "restored: $TRACKED"
+  if check_schemas_untouched; then
+    echo "schemas guard: every other file under schemas/ (incl. deployments.sepolia.json) is unchanged"
+  elif [ "$status" -eq 0 ]; then
+    status=1
+  fi
   changed=$(git status --porcelain --untracked-files=no -- schemas pipeline contracts)
   if [ -n "$changed" ]; then
     echo "WARNING: still modified:"
@@ -79,6 +111,7 @@ if grep -qE 'dotenv_values|^eval ' "$DEPLOY_COPY"; then
   exit 1
 fi
 bash "$DEPLOY_COPY" 1 2 3 4
+check_schemas_untouched || exit 1
 echo
 echo "== read-only refusal check: nothing is claimed yet, so read-only mode must refuse =="
 if READ_ONLY=1 node zk/cheat_demo.js --no-write; then
