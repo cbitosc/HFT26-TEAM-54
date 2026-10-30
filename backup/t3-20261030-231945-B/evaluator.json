@@ -1,0 +1,30 @@
+{
+  "task_id": 3,
+  "agent_wallet": "0x636Dc6b431a3C1b2aF0140C8C014b1CE60FDbdBA",
+  "metrics": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      100,
+      87,
+      50,
+      30
+    ],
+    [
+      100,
+      100,
+      60,
+      80
+    ]
+  ],
+  "snapshot_hash": "3889891654982476525799453749312033054062973343910516223041217432153542818571",
+  "test_suite_hash": "0xf1b54df4646ea77a5f5852a5e4799c4abe6579135f567ff0d6c2ebbbb91c89ce",
+  "chain_id": 11155111,
+  "registry": "0xF97417eccD3ab2Db4F9787Aba3b4713e082d61D9",
+  "evaluator_address": "0xeC9D569DE0e5e7F671396a2B95200EC722fbb5D0",
+  "signature": "0xb08c97b5f757bfe7077ea8892c30cb4296469d46da2a6b46c10ee88889d38ebe74855ae863e4b970dc16a6869fdb50c0d687ad9e33fd7005c4ffd5e3c197823c1c"
+}
