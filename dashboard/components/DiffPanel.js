@@ -70,8 +70,7 @@ export default function DiffPanel({ run, dark }) {
           <NeuButton key={i} active={i === idx} onClick={() => setPick(i)}>
             V{x.v} → V{y.v}
             <span className="ml-1.5 tabular-nums opacity-70">
-              {y.score - x.score >= 0 ? "+" : ""}
-              {y.score - x.score}
+              {y.score != null && x.score != null ? `${y.score - x.score >= 0 ? "+" : ""}${y.score - x.score}` : ""}
             </span>
           </NeuButton>
         ))}
@@ -100,7 +99,7 @@ export default function DiffPanel({ run, dark }) {
         />
       </div>
 
-      {b.failed_cases?.length > 0 && (
+      {(b.failed_cases || []).length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 text-sm">
           <span className="text-gray-500 dark:text-gray-400">V{b.v} still fails:</span>
           {b.failed_cases.map((c) => (

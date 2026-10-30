@@ -143,7 +143,7 @@ function buildGraph(detail) {
             : v.status === "running"
               ? "working…"
               : "—",
-        v.status === "done" ? (v.failed_cases.length ? `failed: ${v.failed_cases.join(", ")}` : "all hidden tests pass") : "",
+        v.status === "done" ? ((v.failed_cases || []).length ? `failed: ${(v.failed_cases || []).join(", ")}` : "all hidden tests pass") : "",
       ].filter(Boolean),
     });
     if (prev) edge(prev, id);

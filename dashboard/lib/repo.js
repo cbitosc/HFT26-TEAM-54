@@ -62,7 +62,11 @@ function runFolders() {
       continue;
     }
     for (const name of names) {
-      if (SAFE_ID.test(name)) found.push({ id: name, source, dir: path.join(base, name) });
+      // cheat-* folders are attack fixtures written by zk/cheat_demo.js, not real runs.
+      if (!SAFE_ID.test(name) || name.startsWith("cheat-")) continue;
+      // The same run can be in runs/ and backup/: show it once, preferring runs/ (SOURCES order).
+      if (found.some((f) => f.id === name)) continue;
+      found.push({ id: name, source, dir: path.join(base, name) });
     }
   }
   return found;
