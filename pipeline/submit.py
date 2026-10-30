@@ -12,6 +12,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from web3.logs import DISCARD
+
 from common.config import addresses, get_registry, get_web3, load_deployment
 from common.hashing import keccak, snapshot_hash_of_file, to_field
 from pipeline.ipfs import fetch, gateway_url, upload_file
@@ -101,7 +103,8 @@ def main():
     if receipt.status != 1:
         fail(run_dir, f"transaction reverted on-chain: 0x{tx_hash.hex()}")
 
-    logs = registry.events.ImprovementVerified().process_receipt(receipt)
+    # DISCARD: Sepolia also emits a system log for the ETH reward transfer; it is not our event.
+    logs = registry.events.ImprovementVerified().process_receipt(receipt, errors=DISCARD)
     record_id = logs[0]["args"]["recordId"]
     reward = logs[0]["args"]["rewardWei"]
 

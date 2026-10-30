@@ -1,0 +1,40 @@
+{
+  "attacks": [
+    {
+      "name": "score_down",
+      "description": "Third score is lower than the second: the S2 < S3 rule makes a proof impossible",
+      "expected": "CANNOT PROVE",
+      "actual": "CANNOT PROVE",
+      "rejected": true
+    },
+    {
+      "name": "forged_metrics",
+      "description": "Valid proof for unclaimed task 3, then one public metric (V3 metric 0) is edited after proving",
+      "expected": "BAD_PROOF",
+      "actual": "BAD_PROOF",
+      "rejected": true
+    },
+    {
+      "name": "stolen_proof",
+      "description": "Agent B submits Agent A's proof for task 1: the proof is bound to Agent A's wallet",
+      "expected": "NOT_AGENT",
+      "actual": "NOT_AGENT",
+      "rejected": true
+    },
+    {
+      "name": "replay",
+      "description": "Agent A already claimed task 1 earlier on this chain; the same claim is submitted again (read-only: staticCall)",
+      "expected": "ALREADY_CLAIMED",
+      "actual": "ALREADY_CLAIMED",
+      "rejected": true
+    },
+    {
+      "name": "invented_metrics",
+      "description": "Agent invents improving metrics for task 2 and signs them with a random wallet instead of the evaluator",
+      "expected": "BAD_EVALUATOR_SIG",
+      "actual": "BAD_EVALUATOR_SIG",
+      "rejected": true
+    }
+  ],
+  "all_rejected": true
+}
