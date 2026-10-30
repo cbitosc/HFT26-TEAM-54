@@ -6,12 +6,12 @@ import { Badge, Card, Empty } from "@/components/ui";
 function Tip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs shadow dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="neu-raised-sm rounded-xl px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
       <div className="mb-1 font-semibold">{label}</div>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center gap-2">
-          <span className="inline-block h-2 w-2 rounded-sm" style={{ background: p.color }} />
-          <span className="text-zinc-600 dark:text-zinc-300">{p.name}</span>
+          <span className="inline-block h-2 w-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-gray-600 dark:text-gray-300">{p.name}</span>
           <span className="ml-auto font-semibold tabular-nums">{p.value}</span>
         </div>
       ))}
@@ -39,25 +39,25 @@ export default function BenchmarkChart({ benchmark }) {
         </div>
       }
     >
-      <div className="mb-4 flex flex-wrap gap-6">
+      <div className="mb-6 flex flex-wrap gap-6">
         <div>
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">Average V1 score</div>
-          <div className="text-2xl font-bold tabular-nums">
+          <div className="text-xs text-gray-500 dark:text-gray-400">Average V1 score</div>
+          <div className="text-2xl font-bold tabular-nums text-gray-800 dark:text-gray-100">
             {s.avg_score_without} → {s.avg_score_with}
-            <span className={`ml-2 text-base ${delta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+            <span className="ml-2 text-base" style={{ color: delta >= 0 ? "var(--ink-teal)" : "var(--ink-red)" }}>
               ({delta >= 0 ? "+" : ""}
               {delta})
             </span>
           </div>
         </div>
         <div>
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">Tasks improved</div>
-          <div className="text-2xl font-bold tabular-nums">
+          <div className="text-xs text-gray-500 dark:text-gray-400">Tasks improved</div>
+          <div className="text-2xl font-bold tabular-nums text-gray-800 dark:text-gray-100">
             {s.tasks_improved} / {s.tasks_total}
           </div>
         </div>
       </div>
-      <div className="h-64 text-zinc-500 dark:text-zinc-400">
+      <div className="neu-inset h-72 rounded-xl p-4 text-gray-500 dark:text-gray-400">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barGap={2} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.15} />
@@ -66,7 +66,7 @@ export default function BenchmarkChart({ benchmark }) {
             <Tooltip content={<Tip />} cursor={{ fill: "currentColor", fillOpacity: 0.06 }} />
             <Legend
               wrapperStyle={{ fontSize: 12 }}
-              formatter={(value) => <span className="text-zinc-700 dark:text-zinc-300">{value}</span>}
+              formatter={(value) => <span className="text-gray-700 dark:text-gray-300">{value}</span>}
             />
             <Bar dataKey="without" name="Without memory" fill="var(--without-memory)" radius={[4, 4, 0, 0]} maxBarSize={48} isAnimationActive={false}>
               <LabelList dataKey="without" position="top" fill="currentColor" fontSize={11} />
@@ -78,9 +78,9 @@ export default function BenchmarkChart({ benchmark }) {
         </ResponsiveContainer>
       </div>
       <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-zinc-500 dark:text-zinc-400">Table view and lessons used</summary>
-        <table className="mt-2 w-full text-left text-sm">
-          <thead className="text-xs text-zinc-500 dark:text-zinc-400">
+        <summary className="cursor-pointer text-gray-500 dark:text-gray-400">Table view and lessons used</summary>
+        <table className="mt-2 w-full text-left text-sm text-gray-700 dark:text-gray-200">
+          <thead className="text-xs text-gray-500 dark:text-gray-400">
             <tr>
               <th className="py-1 font-medium">Task</th>
               <th className="py-1 font-medium">Without</th>

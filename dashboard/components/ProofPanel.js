@@ -3,6 +3,14 @@
 import { Badge, Empty, ExtLink, short, weiToEth } from "@/components/ui";
 import { signalLabels, walletFromSignal, scoreOf, pipelineErrors } from "@/lib/model";
 
+const VERDICT_INK = {
+  green: "var(--ink-teal)",
+  red: "var(--ink-red)",
+  amber: "var(--ink-yellow)",
+  blue: "var(--ink-violet)",
+  gray: "var(--neu-dark)",
+};
+
 const REVERTS = [
   "UNKNOWN_TASK",
   "TASK_MISMATCH",
@@ -15,6 +23,8 @@ const REVERTS = [
 ];
 
 function verdict(detail) {
+  if (detail.source === "example")
+    return { tone: "amber", text: "EXAMPLE DATA: placeholder proof, no real transaction or reward" };
   if (detail.receipt) return { tone: "green", text: "Verified on-chain" };
   if (detail.run && detail.run.status !== "improved")
     return { tone: "gray", text: "Not submitted: the run did not improve, so there is nothing to prove" };
@@ -31,7 +41,7 @@ function verdict(detail) {
 function Check({ ok, children }) {
   return (
     <li className="flex items-start gap-2 text-sm">
-      <span className={ok ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
+      <span className="font-bold" style={{ color: ok ? "var(--ink-teal)" : "var(--ink-red)" }}>
         {ok ? "✓" : "✗"}
       </span>
       <span>{children}</span>
@@ -41,7 +51,8 @@ function Check({ ok, children }) {
 
 export default function ProofPanel({ detail }) {
   const v = verdict(detail);
-  const { proof, evaluator, receipt } = detail;
+  const { proof, evaluator } = detail;
+  const receipt = detail.source === "example" ? null : detail.receipt; // fake tx / reward: hide
   const pub = proof?.pubSignals || [];
   const labels = signalLabels();
 
@@ -50,20 +61,15 @@ export default function ProofPanel({ detail }) {
   const sameAsSigned = signed && pub.length === 16 && signed.every((m, i) => m === String(pub[i]));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <span
-          className={`rounded-lg px-3 py-1.5 text-base font-bold ${
-            {
-              green: "bg-emerald-600 text-white",
-              red: "bg-red-600 text-white",
-              blue: "bg-blue-600 text-white",
-              amber: "bg-amber-500 text-white",
-              gray: "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-            }[v.tone]
-          }`}
-        >
-          {v.tone === "green" ? "✓ " : v.tone === "red" ? "✗ " : ""}
+        <span className="neu-raised inline-flex items-center gap-3 rounded-xl py-2 pl-2 pr-4 text-base font-bold text-gray-800 dark:text-gray-100">
+          <span
+            className="neu-inset flex h-8 w-8 items-center justify-center rounded-full text-lg"
+            style={{ color: VERDICT_INK[v.tone] }}
+          >
+            {{ green: "✓", red: "✗", amber: "!", blue: "◆", gray: "·" }[v.tone]}
+          </span>
           {v.text}
         </span>
         {receipt && (
@@ -73,24 +79,24 @@ export default function ProofPanel({ detail }) {
           </>
         )}
       </div>
-      {v.detail && <pre className="whitespace-pre-wrap text-xs text-red-700 dark:text-red-300">{v.detail}</pre>}
+      {v.detail && <pre className="whitespace-pre-wrap text-xs text-[var(--ink-red)]">{v.detail}</pre>}
 
       {receipt && (
         <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
           <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">Record</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Record</dt>
             <dd className="font-semibold">#{receipt.record_id}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">Block</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Block</dt>
             <dd className="font-semibold tabular-nums">{receipt.block}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">Reward paid</dt>
-            <dd className="font-semibold text-emerald-700 dark:text-emerald-400">{weiToEth(receipt.reward_wei)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">Reward paid</dt>
+            <dd className="font-semibold text-[var(--ink-teal)]">{weiToEth(receipt.reward_wei)}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500 dark:text-zinc-400">Chain id</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Chain id</dt>
             <dd className="font-semibold tabular-nums">{receipt.chain_id}</dd>
           </div>
         </dl>
@@ -120,21 +126,21 @@ export default function ProofPanel({ detail }) {
             </Check>
           </ul>
 
-          <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-zinc-50 text-zinc-500 dark:bg-zinc-800/60 dark:text-zinc-400">
+          <div className="neu-inset overflow-hidden rounded-xl p-3">
+            <table className="w-full text-left text-xs text-gray-700 dark:text-gray-200">
+              <thead className="text-gray-500 dark:text-gray-400">
                 <tr>
                   <th className="px-2 py-1.5 font-medium">#</th>
                   <th className="px-2 py-1.5 font-medium">Public signal</th>
                   <th className="px-2 py-1.5 font-medium">Value</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tbody>
                 {pub.map((val, i) => {
                   const shown = i === 14 ? walletFromSignal(val) : val;
                   return (
-                    <tr key={i} className={i % 4 === 0 && i < 12 ? "border-t-2 border-zinc-200 dark:border-zinc-700" : ""}>
-                      <td className="px-2 py-1 tabular-nums text-zinc-400">{i}</td>
+                    <tr key={i} className={i % 4 === 0 && i > 0 ? "[&>td]:pt-3" : ""}>
+                      <td className="px-2 py-1 tabular-nums text-gray-400">{i}</td>
                       <td className="px-2 py-1">{labels[i]}</td>
                       <td className="px-2 py-1 font-mono" title={String(val)}>
                         {i < 12 || i === 15 ? shown : short(shown, 10, 8)}
@@ -149,7 +155,7 @@ export default function ProofPanel({ detail }) {
       )}
 
       {evaluator && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Signed by evaluator <span className="font-mono">{short(evaluator.evaluator_address, 8, 6)}</span> · signature{" "}
           <span className="font-mono">{short(evaluator.signature, 10, 8)}</span> · test suite{" "}
           <span className="font-mono">{short(evaluator.test_suite_hash, 10, 6)}</span>
