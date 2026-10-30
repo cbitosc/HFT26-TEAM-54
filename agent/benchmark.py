@@ -40,6 +40,9 @@ def main():
     config.load_env()
 
     lessons, used = load_memory(args.tasks[0], args.mock_chain)
+    if not lessons:
+        sys.exit("ABORT: no verified memory was loaded, so a with/without comparison would be meaningless. "
+                 "Fix the chain/IPFS access first (nothing written).")
     rows = []
     for task_id in args.tasks:
         print(f"task {task_id}: without memory")
