@@ -38,6 +38,8 @@ def checks(run_dir, run, ev, proof, dep, agent_addr, w3):
     pub = [int(x) for x in proof["pubSignals"]]
     snap = snapshot_hash_of_file(run_dir / "run.json")
     must = [
+        # PLAN.md 3.1: task 1 is Agent A's, tasks 2-4 are Agent B's. The cheat demo also needs tasks 2-3 unclaimed by A.
+        (run["agent"] != "A" or int(run["task_id"]) == 1, f"Agent A may only claim task 1 (this run is task {run['task_id']})"),
         (run["status"] == "improved" and len(run["versions"]) == 3, f"run status is {run['status']!r}, not an improved 3-version run"),
         (not any(str(m).startswith("mock/") for m in run["models"].values() if isinstance(m, str)), "this is a --mock-llm run; mock runs are never submitted"),
         (run["agent_wallet"].lower() != ZERO, "run.json agent_wallet is the zero address (run made before addresses.json existed?)"),
