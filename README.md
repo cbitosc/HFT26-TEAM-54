@@ -22,7 +22,7 @@
 | # | Name | Email | Institution |
 | :--- | :--- | :--- | :--- |
 | 1 | Sai Koushik B | kaushikbommasani@gmail.com | CBIT |
-| 2 | Vishvank Reddy S | vishvankreddysingur@gmail.com | CBIT |
+| 2 | Paidi Karthik | paidikarthik784@gmail.com | CBIT |
 | 3 | Vainyavi Thakur | thakurvainyavi@gmail.com | CBIT |
 
 ---
