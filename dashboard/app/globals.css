@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* Dark mode follows the "dark" class on <html> (set by the theme toggle), not only the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --with-memory: #2a78d6;
+  --without-memory: #a3a29d;
+}
+.dark {
+  color-scheme: dark;
+  --with-memory: #3987e5;
+  --without-memory: #6f6e69;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* React Flow: let our Tailwind node cards define the look. */
+.react-flow__node-step {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
