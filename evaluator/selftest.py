@@ -2,7 +2,17 @@
 import os
 import sys
 
-from evaluator import REPO_ROOT, evaluate
+from common.hashing import test_suite_hash_of_file
+from evaluator import REPO_ROOT, evaluate, tests_path
+
+# Registered on-chain by P3 (registerTask). FROZEN: if a tests.json byte changes, the contract
+# rejects every run for that task. Never edit tests.json; never edit these values to "fix" a mismatch.
+FROZEN_TEST_SUITE_HASHES = {
+    1: "0x0a7f2aa48c053bb2d73a496e4f608291e3ba3f6281986a2a14e6dded1e61f380",
+    2: "0xa37f711408ffa7795f050e0416fc406c2480cbb2ca935625df761224a5381f9a",
+    3: "0xf1b54df4646ea77a5f5852a5e4799c4abe6579135f567ff0d6c2ebbbb91c89ce",
+    4: "0xc58692cb9f433b978c0b8093b63b7276c927dcad5e5e539f582ed1c2820dfe14",
+}
 
 SLOPPY_T1 = '''import re, os
 def parse_log_line(line):
@@ -42,6 +52,9 @@ def check(label, ok):
 
 def main():
     ok = True
+    for t, frozen in FROZEN_TEST_SUITE_HASHES.items():
+        ok &= check(f"t{t} tests.json still matches its on-chain hash",
+                    test_suite_hash_of_file(tests_path(t)) == frozen)
     for t in (1, 2, 3, 4):
         code = (REPO_ROOT / "tasks" / f"t{t}" / "reference.py").read_text(encoding="utf-8")
         r = evaluate(t, code)

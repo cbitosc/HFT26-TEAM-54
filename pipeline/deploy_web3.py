@@ -15,8 +15,8 @@ from common.config import CHAIN, ROOT, SCHEMAS, addresses, get_web3
 from pipeline.post_deploy import CHAIN_IDS, EXPLORERS
 
 OUT = ROOT / "contracts" / "out"
-REWARD_WEI = int(os.getenv("REWARD_WEI", 10**15))
-FUND_WEI = int(os.getenv("FUND_WEI", 10**16))
+REWARD_WEI = int(os.getenv("REWARD_WEI", str(10**15)))
+FUND_WEI = int(os.getenv("FUND_WEI", str(10**16)))
 HEADROOM = 1.25  # on top of the node's own estimate
 
 

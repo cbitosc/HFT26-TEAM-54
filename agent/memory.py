@@ -22,7 +22,8 @@ from common.hashing import keccak, to_field
 
 RECORD_TYPE = "(uint256,address,string,uint256,uint256,uint256[3],uint64)"
 MAX_LESSONS = 5
-IPFS_FALLBACK_GATEWAY = "https://ipfs.io/ipfs/"
+IPFS_FALLBACK_GATEWAYS = ["https://gateway.pinata.cloud/ipfs", "https://w3s.link/ipfs",
+                          "https://ipfs.io/ipfs", "https://dweb.link/ipfs"]
 
 
 # ---------- chain ----------
@@ -65,7 +66,7 @@ def _gateways() -> list:
     if gw:
         gw = gw if gw.startswith("http") else "https://" + gw
         urls.append(gw if gw.endswith("/ipfs") else gw + "/ipfs")
-    urls.append(IPFS_FALLBACK_GATEWAY.rstrip("/"))
+    urls.extend(IPFS_FALLBACK_GATEWAYS)
     return urls
 
 
