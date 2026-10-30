@@ -3,6 +3,8 @@
 > **Official Public Starter Repository for CBIT Hacktoberfest '26**  
 > *Chaitanya Bharathi Institute of Technology (CBIT), Hyderabad*
 
+**Our project: AutoEvolve Protocol.** Team plan and frozen interfaces: [PLAN.md](PLAN.md). Live status: [docs/STATUS.md](docs/STATUS.md).
+
 ---
 
 ## 📋 Team Information
