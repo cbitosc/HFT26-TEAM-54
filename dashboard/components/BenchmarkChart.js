@@ -13,6 +13,23 @@ const tone = (n) => (n > 0 ? "var(--ink-teal)" : n < 0 ? "var(--ink-red)" : "var
 const word = (n) => (n > 0 ? "improved" : n < 0 ? "regressed" : "no change");
 const mean = (xs) => Math.floor(xs.reduce((a, b) => a + b, 0) / xs.length);
 
+// X-axis label. A score of 0 draws a zero-height bar (looks like missing data), so say it in words.
+function TaskTick({ x, y, payload, zeros }) {
+  const zero = zeros[payload.value] || [];
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text y={14} textAnchor="middle" fill="currentColor" fontSize={12}>
+        {payload.value}
+      </text>
+      {zero.map((side, i) => (
+        <text key={side} y={30 + i * 14} textAnchor="middle" fill="var(--ink-red)" fontSize={11} fontWeight={600}>
+          {side}: 0 (all tests failed)
+        </text>
+      ))}
+    </g>
+  );
+}
+
 function Tip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
@@ -58,6 +75,9 @@ export default function BenchmarkChart({ benchmark }) {
   const improved = rows.filter((r) => r.delta > 0).length;
   const regressed = rows.filter((r) => r.delta < 0);
   const data = rows.map((r) => ({ task: `Task ${r.id}`, without: r.without, with: r.with }));
+  const zeros = Object.fromEntries(
+    rows.map((r) => [`Task ${r.id}`, [r.without === 0 && "without memory", r.with === 0 && "with memory"].filter(Boolean)])
+  );
 
   return (
     <Card
@@ -95,9 +115,9 @@ export default function BenchmarkChart({ benchmark }) {
 
       <div className="neu-inset h-72 rounded-xl p-4 text-gray-500 dark:text-gray-400">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} barGap={2} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
+          <BarChart data={data} barGap={2} margin={{ top: 20, right: 8, left: 0, bottom: 14 }}>
             <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.15} />
-            <XAxis dataKey="task" tickLine={false} axisLine={false} tick={{ fill: "currentColor", fontSize: 12 }} />
+            <XAxis dataKey="task" tickLine={false} axisLine={false} height={48} tick={<TaskTick zeros={zeros} />} />
             <YAxis domain={[0, 10000]} tickLine={false} axisLine={false} width={48} tick={{ fill: "currentColor", fontSize: 12 }} />
             <Tooltip content={<Tip />} cursor={{ fill: "currentColor", fillOpacity: 0.06 }} />
             <Legend
