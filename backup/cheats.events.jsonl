@@ -1,5 +1,5 @@
-{"ts":"2026-10-30T23:01:04Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"CANNOT PROVE"}
-{"ts":"2026-10-30T23:01:06Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"BAD_PROOF"}
-{"ts":"2026-10-30T23:01:06Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"NOT_AGENT"}
-{"ts":"2026-10-30T23:01:06Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"ALREADY_CLAIMED"}
-{"ts":"2026-10-30T23:01:08Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"BAD_EVALUATOR_SIG"}
+{"ts":"2026-10-30T23:23:16Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"CANNOT PROVE"}
+{"ts":"2026-10-30T23:23:18Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"BAD_PROOF"}
+{"ts":"2026-10-30T23:23:18Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"NOT_AGENT"}
+{"ts":"2026-10-30T23:23:18Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"ALREADY_CLAIMED"}
+{"ts":"2026-10-30T23:23:20Z","actor":"cheat","step":"error","v":null,"score":null,"msg":"BAD_EVALUATOR_SIG"}
