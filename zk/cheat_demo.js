@@ -15,9 +15,12 @@
 //
 // Env (from .env via dotenv, never printed): CHAIN, RPC_URL, AGENT_A_PRIVATE_KEY (local mode only).
 // PY = python interpreter for agent.run / attest.sign (default .venv/bin/python if it exists).
+// Scratch run folders (fake secrets) go in a temp dir outside the repo, deleted at the end of every run;
+// stale runs/cheat-* folders from older versions are removed at startup (that prefix only).
 // Writes runs/cheats.json and runs/cheats.events.jsonl (truncated at the start of each run, then one line
 // per attack); never touches a real run's events.jsonl. Flag --no-write skips both files.
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
@@ -31,6 +34,35 @@ const LOCAL_CHAIN_ID = 31337n;
 const P = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 const RUNS = path.join(ROOT, "runs");
 const EVENTS = path.join(RUNS, "cheats.events.jsonl");
+
+// Scratch run folders (fake secret.json and all) live in a temp dir OUTSIDE the repo, so nothing that scans
+// runs/ (the dashboard) can mistake them for real runs. Removed at the end of every run, in a finally
+// block, on SIGINT/SIGTERM, and on any process exit.
+let tmpRoot = null;
+const getTmp = () => (tmpRoot = tmpRoot || fs.mkdtempSync(path.join(os.tmpdir(), "autoevolve-cheat-")));
+function cleanupTemp() {
+  if (!tmpRoot) return;
+  try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) { /* best effort */ }
+  tmpRoot = null;
+}
+for (const [sig, code] of [["SIGINT", 130], ["SIGTERM", 143]]) {
+  process.on(sig, () => { cleanupTemp(); process.exit(code); });
+}
+process.on("exit", cleanupTemp);
+
+// Remove stale runs/cheat-* folders left by older versions of this script. Exactly that prefix, real
+// directories only (never symlinks); every other entry under runs/ is left alone.
+function removeStaleCheatFolders() {
+  if (!fs.existsSync(RUNS)) return 0;
+  let removed = 0;
+  for (const entry of fs.readdirSync(RUNS, { withFileTypes: true })) {
+    if (entry.isDirectory() && !entry.isSymbolicLink() && entry.name.startsWith("cheat-")) {
+      fs.rmSync(path.join(RUNS, entry.name), { recursive: true, force: true });
+      removed += 1;
+    }
+  }
+  return removed;
+}
 const PY = process.env.PY || (fs.existsSync(path.join(ROOT, ".venv", "bin", "python")) ? ".venv/bin/python" : "python3");
 
 function readJson(rel) {
@@ -63,10 +95,10 @@ function evaluatorDigest({ chainId, registry, taskId, agent, metrics, snapshot, 
     [chainId, registry, taskId, agent, metrics.flat(), snapshot, suite]));
 }
 
-// A made-up run folder (runs/cheat-<name>) with metrics we choose, whose evaluator.json is signed by `signer`.
+// A made-up run folder (in the temp dir, not in the repo) with metrics we choose, whose evaluator.json is
+// signed by `signer`. prove.js takes any folder path, so it does not need to live under runs/.
 async function syntheticRun(ctx, name, taskId, metrics, signer) {
-  const dir = path.join(RUNS, `cheat-${name}`);
-  fs.rmSync(dir, { recursive: true, force: true });
+  const dir = path.join(getTmp(), name);
   fs.mkdirSync(dir, { recursive: true });
   const suite = await ctx.registry.testSuiteHash(taskId);
   const run = {
@@ -106,7 +138,7 @@ async function attempt(ctx, from, taskId, p, sig) {
 
 const IMPROVING = [[40, 30, 60, 50], [70, 60, 80, 70], [95, 90, 90, 90]];
 
-async function main() {
+async function run() {
   if (process.argv.includes("--preflight")) {
     let host = "";
     try { host = new URL(RPC).hostname; } catch (e) { host = ""; }
@@ -141,6 +173,9 @@ async function main() {
     }
     process.exit(0);
   }
+
+  const stale = removeStaleCheatFolders();
+  if (stale) console.log(`removed ${stale} stale runs/cheat-* folder(s) left by an older version`);
 
   const deployment = readJson(`schemas/deployments.${CHAIN}.json`);
   if (BigInt(deployment.chain_id) !== chainId) {
@@ -300,10 +335,22 @@ async function main() {
   console.log(`all_rejected: ${allRejected}`);
   console.log(noWrite ? "(--no-write: runs/cheats.json and runs/cheats.events.jsonl left untouched)" : "wrote runs/cheats.json and runs/cheats.events.jsonl");
   const readOnlyViolation = !isLocal && txSent !== 0;
-  process.exit(allRejected && (honest === "NO_REVERT" || honest === "SKIPPED") && !readOnlyViolation ? 0 : 1);
+  return allRejected && (honest === "NO_REVERT" || honest === "SKIPPED") && !readOnlyViolation ? 0 : 1;
 }
 
-main().catch((e) => {
-  console.error(`ERROR: ${String(e && e.message ? e.message : e)}`);
-  process.exit(1);
-});
+// run() returns the exit code instead of calling process.exit, so this finally always runs (process.exit
+// inside run() would skip it). Refusals and errors therefore leave no temp dir behind either.
+async function main() {
+  try {
+    return await run();
+  } finally {
+    cleanupTemp();
+  }
+}
+
+main().then(
+  (code) => process.exit(code),
+  (e) => {
+    console.error(`ERROR: ${String(e && e.message ? e.message : e)}`);
+    process.exit(1);
+  });
