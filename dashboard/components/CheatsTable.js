@@ -25,8 +25,9 @@ export default function CheatsTable({ cheats }) {
       {!list.length ? (
         <Empty>runs/cheats.json not found yet (P2: node zk/cheat_demo.js).</Empty>
       ) : (
-        <table className="w-full text-left text-sm">
-          <thead className="text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="neu-inset overflow-x-auto rounded-xl p-3">
+        <table className="w-full text-left text-sm text-gray-700 dark:text-gray-200">
+          <thead className="text-xs text-gray-500 dark:text-gray-400">
             <tr>
               <th className="py-1.5 pr-3 font-medium">Attack</th>
               <th className="py-1.5 pr-3 font-medium">What the cheater tried</th>
@@ -35,11 +36,11 @@ export default function CheatsTable({ cheats }) {
               <th className="py-1.5 font-medium">Result</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody>
             {list.map((r, i) => (
               <tr key={i}>
                 <td className="py-2 pr-3 font-medium">{r.name}</td>
-                <td className="py-2 pr-3 text-zinc-600 dark:text-zinc-300">{r.description}</td>
+                <td className="py-2 pr-3 text-gray-600 dark:text-gray-300">{r.description}</td>
                 <td className="py-2 pr-3 font-mono text-xs">{r.expected}</td>
                 <td className="py-2 pr-3 font-mono text-xs">{r.actual}</td>
                 <td className="py-2">
@@ -49,6 +50,7 @@ export default function CheatsTable({ cheats }) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </Card>
   );
