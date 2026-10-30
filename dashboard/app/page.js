@@ -2,13 +2,13 @@
 // The whole dashboard: header, tabs, and the panels. Every panel polls its API route every 3 s.
 import { useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import { Badge, Card, Empty, StatusBadge, ExtLink, short, scoreLine, usePoll } from "@/components/ui";
+import { Badge, Card, Empty, StatusBadge, ExtLink, Spinner, short, scoreLine, usePoll } from "@/components/ui";
 import RunList from "@/components/RunList";
 import ProofPanel from "@/components/ProofPanel";
 import ChainLog from "@/components/ChainLog";
 import CheatsTable from "@/components/CheatsTable";
 import { EventLog, MemoryUsed } from "@/components/EventLog";
-import { isLive } from "@/lib/model";
+import { isLive, criticThinking, elapsed } from "@/lib/model";
 
 // These three draw with browser-only APIs, so render them in the browser only.
 const ExecTree = dynamic(() => import("@/components/ExecTree"), { ssr: false });
@@ -48,6 +48,7 @@ function useTheme() {
 
 function RunHeader({ detail }) {
   const run = detail.run;
+  const thinking = criticThinking(detail);
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <h2 className="font-mono text-lg font-semibold">{detail.id}</h2>
@@ -65,6 +66,16 @@ function RunHeader({ detail }) {
         <span className="ml-auto font-mono text-lg font-bold tabular-nums">
           {scoreLine(run.versions.map((v) => v.score))}
         </span>
+      )}
+      {thinking && (
+        <div className="flex w-full items-center gap-2.5 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-sm dark:border-blue-800 dark:bg-blue-950/50">
+          <Spinner className="h-4 w-4" />
+          <span>
+            <span className="font-semibold">{thinking.model}</span> is reviewing the failures of V{thinking.v} ·{" "}
+            <span className="font-mono tabular-nums">{elapsed(thinking.since)}</span>
+            <span className="text-zinc-500 dark:text-zinc-400"> · reasoning models can take several minutes; not stuck</span>
+          </span>
+        </div>
       )}
     </div>
   );

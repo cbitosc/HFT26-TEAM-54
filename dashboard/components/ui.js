@@ -118,6 +118,15 @@ export function ExtLink({ href, children }) {
   );
 }
 
+export function Spinner({ className = "h-3 w-3" }) {
+  return (
+    <span
+      aria-label="working"
+      className={`inline-block shrink-0 animate-spin rounded-full border-2 border-blue-500 border-t-transparent ${className}`}
+    />
+  );
+}
+
 export function Empty({ children }) {
   return <p className="text-sm text-zinc-500 dark:text-zinc-400">{children}</p>;
 }

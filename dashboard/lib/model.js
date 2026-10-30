@@ -89,8 +89,26 @@ export function deriveSteps(detail) {
   return steps;
 }
 
+const THINKING_MS = 20 * 60_000; // R1 may reason for several minutes without writing anything
+
+// The critic (DeepSeek-R1) is still reasoning: the last event is "<model> is reviewing V<n> ...".
+// Returns { v, model, since } or null.
+export function criticThinking(detail) {
+  const events = detail.events || [];
+  const last = events[events.length - 1];
+  if (detail.run || !last || last.step !== "critique" || !/ is reviewing /.test(last.msg || "")) return null;
+  const since = Date.parse(last.ts);
+  if (!(Date.now() - since < THINKING_MS)) return null;
+  return { v: last.v, model: last.msg.split(" is reviewing ")[0], since };
+}
+
 export function isLive(detail) {
-  return Date.now() - (detail.updated || 0) < LIVE_MS;
+  return Date.now() - (detail.updated || 0) < LIVE_MS || !!criticThinking(detail);
+}
+
+export function elapsed(since) {
+  const s = Math.max(0, Math.round((Date.now() - since) / 1000));
+  return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
 }
 
 // PLAN.md 3.5: exactly 16 public signals, in this order.

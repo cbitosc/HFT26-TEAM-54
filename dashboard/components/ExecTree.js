@@ -4,19 +4,19 @@
 import { useMemo } from "react";
 import { ReactFlow, Handle, Position, Background } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { deriveVersions, deriveSteps } from "@/lib/model";
-import { short } from "@/components/ui";
+import { deriveVersions, deriveSteps, criticThinking, elapsed } from "@/lib/model";
+import { short, Spinner } from "@/components/ui";
 
 const STYLE = {
   done: "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60",
-  running: "border-blue-500 bg-blue-50 dark:bg-blue-950/60 animate-pulse",
+  running: "border-blue-500 bg-blue-50 dark:bg-blue-950/60",
   pending: "border-dashed border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900",
   rejected: "border-red-500 bg-red-50 dark:bg-red-950/60",
   error: "border-red-500 bg-red-50 dark:bg-red-950/60",
   skipped: "border-dashed border-zinc-300 bg-zinc-50 opacity-50 dark:border-zinc-700 dark:bg-zinc-900",
   memory: "border-violet-500 bg-violet-50 dark:bg-violet-950/60",
 };
-const ICON = { done: "✓", running: "…", pending: "", rejected: "✗", error: "✗", skipped: "", memory: "◆" };
+const ICON = { done: "✓", pending: "", rejected: "✗", error: "✗", skipped: "", memory: "◆" };
 
 function StepNode({ data }) {
   return (
@@ -25,8 +25,8 @@ function StepNode({ data }) {
       <Handle type="target" id="top" position={Position.Top} className="!opacity-0" />
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{data.title}</span>
-        <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">
-          {ICON[data.status]} {data.score != null ? data.score : ""}
+        <span className="flex items-center gap-1 text-xs font-bold text-zinc-600 dark:text-zinc-300">
+          {data.status === "running" ? <Spinner /> : ICON[data.status]} {data.score != null ? data.score : ""}
         </span>
       </div>
       {data.lines?.map((l, i) => (
@@ -71,10 +71,12 @@ function buildGraph(detail) {
     x += X;
   }
 
+  const thinking = criticThinking(detail);
   let maxRetries = 0;
   for (const v of versions) {
     const id = `v${v.v}`;
     const m = v.metrics;
+    const reviewing = thinking && v.status === "running" && thinking.v === v.v - 1;
     nodes.push({
       id,
       type: "step",
@@ -84,7 +86,13 @@ function buildGraph(detail) {
         status: v.status,
         score: v.score,
         lines: [
-          m ? `tests ${m[0]} · edge ${m[1]} · lint ${m[2]} · simp ${m[3]}` : v.status === "running" ? "working…" : "—",
+          reviewing
+            ? `critic reviewing V${thinking.v} · ${elapsed(thinking.since)}`
+            : m
+              ? `tests ${m[0]} · edge ${m[1]} · lint ${m[2]} · simp ${m[3]}`
+              : v.status === "running"
+                ? "working…"
+                : "—",
           v.status === "done" ? (v.failed_cases.length ? `failed: ${v.failed_cases.join(", ")}` : "all hidden tests pass") : "",
         ].filter(Boolean),
       },
