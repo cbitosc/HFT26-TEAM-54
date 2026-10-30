@@ -1,0 +1,10 @@
+{
+  "chain": "local",
+  "chain_id": 31337,
+  "registry": "0x92b45A29c9EB10c94eC65dAb1295bfA351Ea17D4",
+  "verifier": "0x8c62702fE8DEB822b26dc9a00617853275FbF531",
+  "evaluator": "0xeC9D569DE0e5e7F671396a2B95200EC722fbb5D0",
+  "deploy_block": 1,
+  "reward_wei": "1000000000000000",
+  "explorer": ""
+}
