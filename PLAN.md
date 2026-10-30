@@ -77,6 +77,8 @@ NEVER cut: proof verified on-chain, CID on-chain, reward paid, Agent B reading m
 - Reward = 0.001 ETH (1000000000000000 wei). Escrow funded with 0.01-0.02 ETH.
 - Chain: chosen by P3 by 10:30 PM (Sepolia 11155111 or Base Sepolia 84532). Local fallback: Anvil 31337. NEVER hardcode chain or addresses; read schemas/deployments.<CHAIN>.json, where CHAIN comes from .env (sepolia | basesepolia | local).
 - Tasks: 1 = Agent A demo task; 2, 3, 4 = Agent B benchmark tasks. All are family "log_parsing".
+- Models (Featherless ids): generator = Qwen/Qwen2.5-Coder-32B-Instruct; critic = deepseek-ai/DeepSeek-R1-0528 (plain DeepSeek-R1 is not on Featherless).
+- schemas/addresses.json keys: deployer, agent_A, agent_B, evaluator. schemas/deployments.<CHAIN>.json keys: chain, chain_id, registry, verifier, evaluator, deploy_block, reward_wei, explorer. Read them via common/config.py (addresses(), load_deployment()).
 
 ### 3.2 Hashing rules (common/hashing.py from P3 implements these; everyone imports it)
 - canonical_bytes(obj) = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
@@ -102,7 +104,7 @@ run.json: PUBLIC, written by P1. Example:
   "task_family": "log_parsing",
   "agent": "A",
   "agent_wallet": "0x...",
-  "models": {"generator": "Qwen/Qwen2.5-Coder-32B-Instruct", "critic": "deepseek-ai/DeepSeek-R1", "temperature": 0.0, "seed": 42},
+  "models": {"generator": "Qwen/Qwen2.5-Coder-32B-Instruct", "critic": "deepseek-ai/DeepSeek-R1-0528", "temperature": 0.0, "seed": 42},
   "metric_names": ["tests_passed", "edge_cases", "lint", "simplicity"],
   "weights": [50, 20, 15, 15],
   "test_suite_hash": "0x...",

@@ -1,0 +1,16 @@
+```python
+LEVELS = ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
+
+
+def filter_by_level(text: str, min_level: str) -> list:
+    threshold = LEVELS.index(min_level.upper())
+    result = []
+    for line in text.split("\n"):
+        parts = line.split(" ", 3)
+        if len(parts) < 4:
+            continue
+        level = parts[2].strip("[]").upper()
+        if level in LEVELS and LEVELS.index(level) >= threshold:
+            result.append(parts[3].strip())
+    return result
+```

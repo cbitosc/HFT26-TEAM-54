@@ -1,0 +1,6 @@
+{
+  "1": {"family": "log_parsing", "function_name": "parse_log_line", "dir": "tasks/t1"},
+  "2": {"family": "log_parsing", "function_name": "count_levels", "dir": "tasks/t2"},
+  "3": {"family": "log_parsing", "function_name": "extract_fields", "dir": "tasks/t3"},
+  "4": {"family": "log_parsing", "function_name": "filter_by_level", "dir": "tasks/t4"}
+}

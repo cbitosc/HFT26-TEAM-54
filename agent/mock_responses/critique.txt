@@ -1,0 +1,7 @@
+<think>
+Generic review.
+</think>
+Re-read every edge rule in the specification: surrounding whitespace and tabs, case-insensitive
+level names with the WARNING alias, optional spaces inside the brackets, numeric ranges for the
+date and time, empty messages, and returning the spec default instead of raising. Fix each rule
+the failing inputs above break, and keep each function at complexity 5 or less.
