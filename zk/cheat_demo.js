@@ -111,8 +111,8 @@ async function main() {
     let host = "";
     try { host = new URL(RPC).hostname; } catch (e) { host = ""; }
     const ok = CHAIN === "local" && ["127.0.0.1", "localhost", "::1", "[::1]"].includes(host);
-    console.log(ok ? "preflight: .env points at a local chain: OK"
-      : "preflight: REFUSING: .env is not set for local Anvil (CHAIN must be local and RPC_URL must be localhost)");
+    console.log(ok ? "preflight: CHAIN and RPC_URL resolve to a local chain: OK"
+      : "preflight: REFUSING: CHAIN and RPC_URL do not resolve to local Anvil (CHAIN must be local and RPC_URL must be localhost)");
     process.exit(ok ? 0 : 1);
   }
   const noWrite = process.argv.includes("--no-write");
