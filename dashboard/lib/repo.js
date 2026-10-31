@@ -67,6 +67,11 @@ function looksLikeRun(dir) {
   return readJsonl(path.join(dir, "events.jsonl")).length > 0;
 }
 
+// How far a run folder got after the agent loop: 0 = run only, 3 = on-chain receipt.
+function progress(dir) {
+  return ["evaluator.json", "proof.json", "receipt.json"].filter((f) => fs.existsSync(path.join(dir, f))).length;
+}
+
 function runFolders() {
   const found = [];
   for (const source of SOURCES) {
@@ -81,9 +86,11 @@ function runFolders() {
       // Only real runs: cheat-* fixtures, scratch folders and half-made folders are skipped.
       const dir = path.join(base, name);
       if (!RUN_ID.test(name) || !looksLikeRun(dir)) continue;
-      // The same run can be in runs/ and backup/: show it once, preferring runs/ (SOURCES order).
-      if (found.some((f) => f.id === name)) continue;
-      found.push({ id: name, source, dir });
+      // The same run can be in runs/ and backup/: show it once. Keep the copy that got further
+      // (receipt > proof > signature), so a partial copy never hides a verified one; on a tie, runs/ wins.
+      const prev = found.findIndex((f) => f.id === name);
+      if (prev === -1) found.push({ id: name, source, dir });
+      else if (progress(dir) > progress(found[prev].dir)) found[prev] = { id: name, source, dir };
     }
   }
   return found;
