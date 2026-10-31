@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+**/secret.json
+runs/
+agent/.cache/
+agent/prompts/system_prompt.txt
+node_modules/
+.venv/
+__pycache__/
+zk/build/
+zk/ptau/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+dashboard/.next/
+.DS_Store

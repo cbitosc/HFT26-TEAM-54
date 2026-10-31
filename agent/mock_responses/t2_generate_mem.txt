@@ -1,0 +1,26 @@
+```python
+import re
+import sys
+
+LEVELS = {"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"}
+LINE = re.compile(r"\d{4}-\d{2}-\d{2}[ \t]+\d{2}:\d{2}:\d{2}[ \t]+\[[ \t]*(\w+)[ \t]*\].*", re.DOTALL)
+
+
+def _level(line):
+    match = LINE.fullmatch(line.strip())
+    if match is None:
+        return None
+    level = match.group(1).upper()
+    return "WARN" if level == "WARNING" else level
+
+
+def count_levels(text: str) -> dict:
+    if not isinstance(text, str):
+        return {}
+    counts = {}
+    for line in text.splitlines():
+        level = _level(line)
+        if level in LEVELS:
+            counts[level] = counts.get(level, 0) + 1
+    return counts
+```

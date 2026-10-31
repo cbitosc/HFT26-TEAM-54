@@ -1,0 +1,135 @@
+{
+  "task_id": 7,
+  "family": "scheduling",
+  "function_name": "parse_duration",
+  "cases": [
+    {
+      "id": "core_1",
+      "category": "core",
+      "args": [
+        "90s"
+      ],
+      "expected": 90
+    },
+    {
+      "id": "core_2",
+      "category": "core",
+      "args": [
+        "2m"
+      ],
+      "expected": 120
+    },
+    {
+      "id": "core_3",
+      "category": "core",
+      "args": [
+        "1h"
+      ],
+      "expected": 3600
+    },
+    {
+      "id": "core_4",
+      "category": "core",
+      "args": [
+        "1h30m"
+      ],
+      "expected": 5400
+    },
+    {
+      "id": "core_5",
+      "category": "core",
+      "args": [
+        "1h 30m 15s"
+      ],
+      "expected": 5415
+    },
+    {
+      "id": "core_6",
+      "category": "core",
+      "args": [
+        "45"
+      ],
+      "expected": 45
+    },
+    {
+      "id": "core_7",
+      "category": "core",
+      "args": [
+        "0s"
+      ],
+      "expected": 0
+    },
+    {
+      "id": "core_8",
+      "category": "core",
+      "args": [
+        "2h5s"
+      ],
+      "expected": 7205
+    },
+    {
+      "id": "edge_1",
+      "category": "edge",
+      "args": [
+        ""
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_2",
+      "category": "edge",
+      "args": [
+        "  10m  "
+      ],
+      "expected": 600
+    },
+    {
+      "id": "edge_3",
+      "category": "edge",
+      "args": [
+        "1H30M"
+      ],
+      "expected": 5400
+    },
+    {
+      "id": "edge_4",
+      "category": "edge",
+      "args": [
+        "30m1h"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_5",
+      "category": "edge",
+      "args": [
+        "1h1h"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_6",
+      "category": "edge",
+      "args": [
+        "abc"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_7",
+      "category": "edge",
+      "args": [
+        "-5s"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_8",
+      "category": "edge",
+      "args": [
+        "1.5h"
+      ],
+      "expected": null
+    }
+  ]
+}

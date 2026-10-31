@@ -1,0 +1,135 @@
+{
+  "task_id": 8,
+  "family": "payments_privacy",
+  "function_name": "mask_card_number",
+  "cases": [
+    {
+      "id": "core_1",
+      "category": "core",
+      "args": [
+        "4111 1111 1111 1111"
+      ],
+      "expected": "**** **** **** 1111"
+    },
+    {
+      "id": "core_2",
+      "category": "core",
+      "args": [
+        "5555555555554444"
+      ],
+      "expected": "**** **** **** 4444"
+    },
+    {
+      "id": "core_3",
+      "category": "core",
+      "args": [
+        "378282246310005"
+      ],
+      "expected": "**** **** ***0 005"
+    },
+    {
+      "id": "core_4",
+      "category": "core",
+      "args": [
+        "6011-1111-1111-1117"
+      ],
+      "expected": "**** **** **** 1117"
+    },
+    {
+      "id": "core_5",
+      "category": "core",
+      "args": [
+        "4012888888881881"
+      ],
+      "expected": "**** **** **** 1881"
+    },
+    {
+      "id": "core_6",
+      "category": "core",
+      "args": [
+        "4222222222222"
+      ],
+      "expected": "**** **** *222 2"
+    },
+    {
+      "id": "core_7",
+      "category": "core",
+      "args": [
+        "  4111 1111 1111 1111  "
+      ],
+      "expected": "**** **** **** 1111"
+    },
+    {
+      "id": "core_8",
+      "category": "core",
+      "args": [
+        "5105 1051 0510 5100"
+      ],
+      "expected": "**** **** **** 5100"
+    },
+    {
+      "id": "edge_1",
+      "category": "edge",
+      "args": [
+        "4111111111111112"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_2",
+      "category": "edge",
+      "args": [
+        "4111"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_3",
+      "category": "edge",
+      "args": [
+        "4111-1111-1111-111a"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_4",
+      "category": "edge",
+      "args": [
+        ""
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_5",
+      "category": "edge",
+      "args": [
+        "6304000000000000"
+      ],
+      "expected": "**** **** **** 0000"
+    },
+    {
+      "id": "edge_6",
+      "category": "edge",
+      "args": [
+        "41111111111111111111"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_7",
+      "category": "edge",
+      "args": [
+        "4111 1111 1111 1111 "
+      ],
+      "expected": "**** **** **** 1111"
+    },
+    {
+      "id": "edge_8",
+      "category": "edge",
+      "args": [
+        "4111_1111_1111_1111"
+      ],
+      "expected": null
+    }
+  ]
+}
