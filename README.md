@@ -26,6 +26,37 @@ Team plan and frozen interfaces: [PLAN.md](PLAN.md) · Live status and links: [d
 - Both IPFS files re-hash to the `snapshotHash` stored on-chain, so anyone can check that the memory was not altered.
 - A read-only attack demo (`node zk/cheat_demo.js`) shows 5 cheating attempts rejected by the contract/prover: score going down, forged metrics, stolen proof, double claim, and an agent inventing its own metrics.
 - The public files of both runs (never the secrets) are saved in [backup/](backup/).
+- Registry state right now: 2 records, 0.008 ETH of reward escrow left (0.01 ETH funded, 0.001 ETH paid per record).
+
+## Links
+
+| What | Link |
+|---|---|
+| Source code | https://github.com/plvt7002/HFT26-TEAM-54 |
+| Registry contract (Sepolia) | https://sepolia.etherscan.io/address/0xF97417eccD3ab2Db4F9787Aba3b4713e082d61D9 |
+| Record #0 run file on IPFS | [public gateway](https://ipfs.io/ipfs/bafkreidqcreyvopzy4avc6me5ehgxpswjdpjtqhuldebunhrsbxotnk3km) · [our Pinata gateway](https://amaranth-written-grasshopper-896.mypinata.cloud/ipfs/bafkreidqcreyvopzy4avc6me5ehgxpswjdpjtqhuldebunhrsbxotnk3km) |
+| Record #1 run file on IPFS | [public gateway](https://ipfs.io/ipfs/bafkreieyly5jei37m24boalkv3xe2e7qxt43hyiapqyauk4ybs5tfijgbi) · [our Pinata gateway](https://amaranth-written-grasshopper-896.mypinata.cloud/ipfs/bafkreieyly5jei37m24boalkv3xe2e7qxt43hyiapqyauk4ybs5tfijgbi) |
+| Dashboard | runs on the demo laptop at `http://localhost:3000` (see [Run it](#run-it)); it is not hosted publicly |
+
+An IPFS address (CID) identifies the content itself, so the same CID works on any gateway.
+
+## Verify it yourself
+
+No keys needed, only a public Sepolia RPC. This downloads every record's run file from IPFS and checks that its hash equals the `snapshotHash` stored on-chain:
+
+```bash
+CHAIN=sepolia RPC_URL=https://ethereum-sepolia-rpc.publicnode.com PYTHONPATH=. python - <<'EOF'
+from common.config import get_registry
+from common.hashing import keccak, to_field
+from pipeline.ipfs import fetch
+
+reg = get_registry()  # address comes from schemas/deployments.sepolia.json
+for i in range(reg.functions.recordCount().call()):
+    r = reg.functions.getRecord(i).call()  # (taskId, agent, cid, snapshotHash, promptCommitment, scores, timestamp)
+    ok = to_field(keccak(fetch(r[2]))) == r[3]
+    print(f"record {i}: task {r[0]}, scores {list(r[5])}, IPFS bytes match on-chain hash: {ok}")
+EOF
+```
 
 ## How it works
 
@@ -92,6 +123,8 @@ CHAIN=sepolia node zk/cheat_demo.js        # 5 attacks, read-only, zero transact
 (cd contracts && forge test)               # 24 tests, 9 against the real verifier and a real proof
 ```
 
+**Dashboard** (`http://localhost:3000`, Next.js; the ☾/☀ button switches dark and light): **Runs** (execution tree, side-by-side diffs, proof panel per run), **On-chain** (registry records and tx links), **Benchmark** (with and without memory, every task including regressions) and **Cheats** (the 5 rejected attacks). It only reads files from the repo and the chain; chain settings go in `dashboard/.env.local` (`CHAIN=sepolia`, `RPC_URL=<public RPC>`, never a key).
+
 **Local fallback (no testnet needed):** start `anvil`, set `CHAIN=local` in `.env`, then `bash pipeline/deploy.sh 1`. The deploy script writes `schemas/deployments.local.json`, the ABI and registers the task hashes. Testnet deploys use `pipeline/deploy_web3.py` (node gas estimates; Foundry's gas simulation does not match Sepolia's current gas schedule).
 
 Chain and addresses are never hardcoded: they come from `.env` (`CHAIN`) and `schemas/deployments.<CHAIN>.json`.
@@ -105,7 +138,7 @@ Chain and addresses are never hardcoded: they come from `.env` (`CHAIN`) and `sc
 
 ## Honest limits
 
-- **Memory does not reliably raise scores.** Benchmark (one sample per task): average V1 went from 8383 without memory to 6080 with memory. Tasks 2 and 4 with memory start so high that a strictly increasing V1 < V2 < V3 could not be proven (the task-4 run ended `failed_no_improvement` and was not submitted); task 3 had a syntax error in V1 (score 0). What *is* demonstrated is the mechanism: Agent B read record #0 from the chain, verified it against IPFS, and used its lessons; its improvement on task 3 came from the critic's feedback.
+- **Memory does not reliably raise scores.** Benchmark (one sample per task, temperature 0): average V1 went from 8383 without memory to 6080 with memory. Per task, the change in V1 with memory was +240 (task 2), 0 (task 3: V1 with memory scored 0 because of a regex syntax error from the model) and +500 (task 4). Tasks 2 and 4 with memory start so high that a strictly increasing V1 < V2 < V3 could not be proven (the task-4 run ended `failed_no_improvement` and was not submitted). What *is* demonstrated is the mechanism: Agent B read record #0 from the chain, verified it against IPFS, and used its lessons; its improvement on task 3 came from the critic's feedback.
 - **Trusted setup was run entirely by us, one contributor per phase.** The public Hermez "Powers of Tau" file returned HTTP 403, so we generated phase 1 ourselves with snarkjs and then ran phase 2 for our circuit. Same maths and formats as the official route, weaker trust: whoever kept the secret randomness could in theory forge proofs. Fine for a hackathon demo; production would use the public Hermez ceremony plus a multi-party phase 2 (details in [docs/explain/p2.md](docs/explain/p2.md)).
 - **Single named evaluator** and non-ZK test execution (see Trust model).
 - Testnet only; all keys are throwaway.
