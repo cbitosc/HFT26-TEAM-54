@@ -1,0 +1,11 @@
+<think>
+All hidden tests pass now. The remaining loss is complexity: one function with many branches and
+boolean operators.
+</think>
+All behaviour is now correct. The remaining problem is structure: parse_log_line has cyclomatic
+complexity 10 because it chains several if statements with "or" range checks, int conversions and
+a separate WARNING branch. Move the range validation into the regular expression itself
+(month (0[1-9]|1[0-2]), day (0[1-9]|[12][0-9]|3[01]), hour ([01][0-9]|2[0-3]), minute and second
+[0-5][0-9]) and use [0-9] instead of \d so only ASCII digits match. Then the function only needs
+to: check the type, fullmatch the stripped line, normalise the level (WARNING -> WARN) and check it
+against the allowed set. Keep the returned keys exactly the same.

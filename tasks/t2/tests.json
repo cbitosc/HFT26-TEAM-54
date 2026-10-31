@@ -1,0 +1,23 @@
+{
+  "task_id": 2,
+  "family": "log_parsing",
+  "function_name": "count_levels",
+  "cases": [
+    {"id": "core_1", "category": "core", "args": ["2024-05-01 10:00:00 [INFO] start"], "expected": {"INFO": 1}},
+    {"id": "core_2", "category": "core", "args": ["2024-05-01 10:00:00 [INFO] a\n2024-05-01 10:00:01 [INFO] b\n2024-05-01 10:00:02 [ERROR] c"], "expected": {"INFO": 2, "ERROR": 1}},
+    {"id": "core_3", "category": "core", "args": ["2024-05-01 10:00:00 [DEBUG] x\n2024-05-01 10:00:01 [WARN] y\n2024-05-01 10:00:02 [CRITICAL] z\n2024-05-01 10:00:03 [DEBUG] w"], "expected": {"DEBUG": 2, "WARN": 1, "CRITICAL": 1}},
+    {"id": "core_4", "category": "core", "args": ["2024-05-01 10:00:00 [ERROR] disk\n2024-05-01 10:00:00 [ERROR] disk"], "expected": {"ERROR": 2}},
+    {"id": "core_5", "category": "core", "args": ["2024-05-01 10:00:00 [INFO] naïve café ☕"], "expected": {"INFO": 1}},
+    {"id": "core_6", "category": "core", "args": ["hello world\n2024-05-01 10:00:00 [INFO] ok"], "expected": {"INFO": 1}},
+    {"id": "core_7", "category": "core", "args": ["2024-05-01 10:00:00 [INFO] a\n2024-05-01 10:00:01 [DEBUG] b\n2024-05-01 10:00:02 [INFO] c\n2024-05-01 10:00:03 [WARN] d\n2024-05-01 10:00:04 [INFO] e"], "expected": {"INFO": 3, "DEBUG": 1, "WARN": 1}},
+    {"id": "core_8", "category": "core", "args": ["no logs here"], "expected": {}},
+    {"id": "edge_1", "category": "edge", "args": [""], "expected": {}},
+    {"id": "edge_2", "category": "edge", "args": ["2024-05-01 10:00:00 [INFO] a\r\n2024-05-01 10:00:01 [ERROR] b\r\n"], "expected": {"INFO": 1, "ERROR": 1}},
+    {"id": "edge_3", "category": "edge", "args": ["2024-05-01 10:00:00 [warning] a\n2024-05-01 10:00:01 [WARN] b"], "expected": {"WARN": 2}},
+    {"id": "edge_4", "category": "edge", "args": ["2024-05-01 10:00:00 [ Info ] a\n2024-05-01 10:00:01 [\terror\t] b"], "expected": {"INFO": 1, "ERROR": 1}},
+    {"id": "edge_5", "category": "edge", "args": ["2024-05-01 10:00:00 [INFO] ok\n2024-05-01 10:61:00 [INFO] bad minute\n2024-13-01 10:00:00 [INFO] bad month"], "expected": {"INFO": 1}},
+    {"id": "edge_6", "category": "edge", "args": ["\n\n   \n\t2024-05-01\t10:00:00\t[DEBUG]\tx  \n\n"], "expected": {"DEBUG": 1}},
+    {"id": "edge_7", "category": "edge", "args": ["2024-05-01 10:00:00 [TRACE] a\n2024-05-01 10:00:01 [FATAL] b\n2024-05-01 10:00:02 [INFO] c"], "expected": {"INFO": 1}},
+    {"id": "edge_8", "category": "edge", "args": ["2024-05-01 10:00:00 [INFO]\n2024-05-01 10:00:01 [INFO] [ERROR] nested"], "expected": {"INFO": 2}}
+  ]
+}

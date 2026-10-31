@@ -1,0 +1,135 @@
+{
+  "task_id": 6,
+  "family": "text_processing",
+  "function_name": "slugify",
+  "cases": [
+    {
+      "id": "core_1",
+      "category": "core",
+      "args": [
+        "Hello World"
+      ],
+      "expected": "hello-world"
+    },
+    {
+      "id": "core_2",
+      "category": "core",
+      "args": [
+        "  Leading and trailing  "
+      ],
+      "expected": "leading-and-trailing"
+    },
+    {
+      "id": "core_3",
+      "category": "core",
+      "args": [
+        "Python 3.12 Released!"
+      ],
+      "expected": "python-3-12-released"
+    },
+    {
+      "id": "core_4",
+      "category": "core",
+      "args": [
+        "already-a-slug"
+      ],
+      "expected": "already-a-slug"
+    },
+    {
+      "id": "core_5",
+      "category": "core",
+      "args": [
+        "Multiple   spaces"
+      ],
+      "expected": "multiple-spaces"
+    },
+    {
+      "id": "core_6",
+      "category": "core",
+      "args": [
+        "UPPER lower"
+      ],
+      "expected": "upper-lower"
+    },
+    {
+      "id": "core_7",
+      "category": "core",
+      "args": [
+        "C++ & Rust: a comparison"
+      ],
+      "expected": "c-rust-a-comparison"
+    },
+    {
+      "id": "core_8",
+      "category": "core",
+      "args": [
+        "2024 Budget Report"
+      ],
+      "expected": "2024-budget-report"
+    },
+    {
+      "id": "edge_1",
+      "category": "edge",
+      "args": [
+        ""
+      ],
+      "expected": "untitled"
+    },
+    {
+      "id": "edge_2",
+      "category": "edge",
+      "args": [
+        "!!!"
+      ],
+      "expected": "untitled"
+    },
+    {
+      "id": "edge_3",
+      "category": "edge",
+      "args": [
+        "Café Crème"
+      ],
+      "expected": "cafe-creme"
+    },
+    {
+      "id": "edge_4",
+      "category": "edge",
+      "args": [
+        "naïve résumé"
+      ],
+      "expected": "naive-resume"
+    },
+    {
+      "id": "edge_5",
+      "category": "edge",
+      "args": [
+        "---dashes---"
+      ],
+      "expected": "dashes"
+    },
+    {
+      "id": "edge_6",
+      "category": "edge",
+      "args": [
+        "under_score"
+      ],
+      "expected": "under-score"
+    },
+    {
+      "id": "edge_7",
+      "category": "edge",
+      "args": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "edge_8",
+      "category": "edge",
+      "args": [
+        "word word word word word word word word word word word word "
+      ],
+      "expected": "word-word-word-word-word-word-word-word-word-word"
+    }
+  ]
+}

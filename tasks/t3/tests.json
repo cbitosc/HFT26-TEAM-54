@@ -1,0 +1,23 @@
+{
+  "task_id": 3,
+  "family": "log_parsing",
+  "function_name": "extract_fields",
+  "cases": [
+    {"id": "core_1", "category": "core", "args": ["2024-06-01 09:00:00 [INFO] login user=alice ip=10.0.0.1"], "expected": {"user": "alice", "ip": "10.0.0.1"}},
+    {"id": "core_2", "category": "core", "args": ["2024-06-01 09:00:00 [ERROR] request failed status=500 path=/api/v1/items"], "expected": {"status": "500", "path": "/api/v1/items"}},
+    {"id": "core_3", "category": "core", "args": ["2024-06-01 09:00:00 [DEBUG] cache_hit=true ttl=30"], "expected": {"cache_hit": "true", "ttl": "30"}},
+    {"id": "core_4", "category": "core", "args": ["2024-06-01 09:00:00 [INFO] service started"], "expected": {}},
+    {"id": "core_5", "category": "core", "args": ["2024-06-01 09:00:00 [WARN] slow query ms=1500 table=orders"], "expected": {"ms": "1500", "table": "orders"}},
+    {"id": "core_6", "category": "core", "args": ["2024-06-01 09:00:00 [INFO] city=Zürich mood=😀"], "expected": {"city": "Zürich", "mood": "😀"}},
+    {"id": "core_7", "category": "core", "args": ["just some text user=bob"], "expected": null},
+    {"id": "core_8", "category": "core", "args": ["2024-06-01 09:00:00 [CRITICAL] shutdown reason=oom"], "expected": {"reason": "oom"}},
+    {"id": "edge_1", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] msg=\"disk almost full\" pct=97"], "expected": {"msg": "disk almost full", "pct": "97"}},
+    {"id": "edge_2", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] user=alice user=bob"], "expected": {"user": "bob"}},
+    {"id": "edge_3", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] User=Alice IP=10.0.0.1"], "expected": {"user": "Alice", "ip": "10.0.0.1"}},
+    {"id": "edge_4", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] url=https://x.io/?a=1&b=2"], "expected": {"url": "https://x.io/?a=1&b=2"}},
+    {"id": "edge_5", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] token= user=carol"], "expected": {"token": "", "user": "carol"}},
+    {"id": "edge_6", "category": "edge", "args": ["2024-06-01 25:00:00 [INFO] user=alice"], "expected": null},
+    {"id": "edge_7", "category": "edge", "args": ["  2024-06-01\t09:00:00 [ warning ]\tuser=dave\tid=7  \n"], "expected": {"user": "dave", "id": "7"}},
+    {"id": "edge_8", "category": "edge", "args": ["2024-06-01 09:00:00 [INFO] 9lives=x =y a-b=z ok=1"], "expected": {"ok": "1"}}
+  ]
+}

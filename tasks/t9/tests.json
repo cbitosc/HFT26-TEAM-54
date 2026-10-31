@@ -1,0 +1,176 @@
+{
+  "task_id": 9,
+  "family": "security",
+  "function_name": "validate_password",
+  "cases": [
+    {
+      "id": "core_1",
+      "category": "core",
+      "args": [
+        "Tr0ub4dor&3xyz"
+      ],
+      "expected": []
+    },
+    {
+      "id": "core_2",
+      "category": "core",
+      "args": [
+        "abc"
+      ],
+      "expected": [
+        "too_short",
+        "no_upper",
+        "no_digit",
+        "no_symbol"
+      ]
+    },
+    {
+      "id": "core_3",
+      "category": "core",
+      "args": [
+        "alllowercase123!"
+      ],
+      "expected": [
+        "no_upper"
+      ]
+    },
+    {
+      "id": "core_4",
+      "category": "core",
+      "args": [
+        "ALLUPPERCASE123!"
+      ],
+      "expected": [
+        "no_lower"
+      ]
+    },
+    {
+      "id": "core_5",
+      "category": "core",
+      "args": [
+        "NoDigitsHere!!"
+      ],
+      "expected": [
+        "no_digit"
+      ]
+    },
+    {
+      "id": "core_6",
+      "category": "core",
+      "args": [
+        "NoSymbols12345"
+      ],
+      "expected": [
+        "no_symbol"
+      ]
+    },
+    {
+      "id": "core_7",
+      "category": "core",
+      "args": [
+        "Correct-Horse-9"
+      ],
+      "expected": []
+    },
+    {
+      "id": "core_8",
+      "category": "core",
+      "args": [
+        "S3cure#Passphrase"
+      ],
+      "expected": []
+    },
+    {
+      "id": "edge_1",
+      "category": "edge",
+      "args": [
+        ""
+      ],
+      "expected": [
+        "too_short",
+        "no_upper",
+        "no_lower",
+        "no_digit",
+        "no_symbol"
+      ]
+    },
+    {
+      "id": "edge_2",
+      "category": "edge",
+      "args": [
+        "password"
+      ],
+      "expected": [
+        "too_short",
+        "no_upper",
+        "no_digit",
+        "no_symbol",
+        "common"
+      ]
+    },
+    {
+      "id": "edge_3",
+      "category": "edge",
+      "args": [
+        "MyPassword123!"
+      ],
+      "expected": [
+        "common"
+      ]
+    },
+    {
+      "id": "edge_4",
+      "category": "edge",
+      "args": [
+        "Has Space 12!X"
+      ],
+      "expected": [
+        "has_space"
+      ]
+    },
+    {
+      "id": "edge_5",
+      "category": "edge",
+      "args": [
+        "admin"
+      ],
+      "expected": [
+        "too_short",
+        "no_upper",
+        "no_digit",
+        "no_symbol",
+        "common"
+      ]
+    },
+    {
+      "id": "edge_6",
+      "category": "edge",
+      "args": [
+        "Ünïcode-Only-1"
+      ],
+      "expected": []
+    },
+    {
+      "id": "edge_7",
+      "category": "edge",
+      "args": [
+        "123456789012"
+      ],
+      "expected": [
+        "no_upper",
+        "no_lower",
+        "no_symbol"
+      ]
+    },
+    {
+      "id": "edge_8",
+      "category": "edge",
+      "args": [
+        "\tTab1!Abcdefgh"
+      ],
+      "expected": [
+        "has_space"
+      ]
+    }
+  ]
+}

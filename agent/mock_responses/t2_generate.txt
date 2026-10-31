@@ -1,0 +1,12 @@
+```python
+def count_levels(text: str) -> dict:
+    counts = {}
+    for line in text.split("\n"):
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+        level = parts[2].strip("[]").upper()
+        if level in ("DEBUG", "INFO", "WARN", "WARNING", "ERROR", "CRITICAL"):
+            counts[level] = counts.get(level, 0) + 1
+    return counts
+```

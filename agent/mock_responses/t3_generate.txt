@@ -1,0 +1,13 @@
+```python
+def extract_fields(line: str) -> dict | None:
+    line = line.strip()
+    parts = line.split(" ")
+    if len(parts) < 3 or not parts[2].startswith("["):
+        return None
+    fields = {}
+    for token in parts[3:]:
+        if "=" in token:
+            key, value = token.split("=", 1)
+            fields[key] = value
+    return fields
+```

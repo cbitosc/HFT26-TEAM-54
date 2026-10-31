@@ -1,0 +1,10 @@
+{
+  "cid": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+  "tx_hash": "0xabababababababababababababababababababababababababababababababab",
+  "block": 7654321,
+  "record_id": 0,
+  "reward_wei": "1000000000000000",
+  "chain_id": 11155111,
+  "explorer_tx_url": "https://sepolia.etherscan.io/tx/0xabababababababababababababababababababababababababababababababab",
+  "ipfs_url": "https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+}

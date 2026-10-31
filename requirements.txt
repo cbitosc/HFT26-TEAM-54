@@ -1,0 +1,16 @@
+# Pinned on purpose (P1): lint/simplicity metrics must be identical on every laptop,
+# because attest/sign.py re-runs evaluate() and signs the result.
+ruff==0.17.3
+radon==6.0.1
+openai==3.41.0
+python-dotenv==1.2.4
+eth-utils==6.0.0
+eth-hash[pycryptodome]==0.8.0
+eth-abi==6.0.0
+
+# P3 / P2 (not needed on laptops that only run the agent)
+web3>=7,<8
+eth-account>=0.13
+requests>=2.31
+pytest>=8
+# fastembed>=0.3   # optional: lesson embeddings (first thing to cut)

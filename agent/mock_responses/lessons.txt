@@ -1,0 +1,3 @@
+- Strip surrounding whitespace (including tabs and \r\n) before matching, and allow one or more spaces or tabs between fields instead of a single literal space.
+- Compare level names case-insensitively, allow optional spaces inside the brackets, map aliases such as WARNING to WARN, and keep an optional/empty trailing message valid.
+- Validate numeric ranges (month, day, hour, minute, second) inside one precise regular expression and return the spec's default value instead of raising, which keeps functions small.

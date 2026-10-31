@@ -1,0 +1,11 @@
+{
+  "1": {"family": "log_parsing", "function_name": "parse_log_line", "dir": "tasks/t1"},
+  "2": {"family": "log_parsing", "function_name": "count_levels", "dir": "tasks/t2"},
+  "3": {"family": "log_parsing", "function_name": "extract_fields", "dir": "tasks/t3"},
+  "4": {"family": "log_parsing", "function_name": "filter_by_level", "dir": "tasks/t4"},
+  "5": {"family": "data_cleaning", "function_name": "parse_csv_line", "dir": "tasks/t5"},
+  "6": {"family": "text_processing", "function_name": "slugify", "dir": "tasks/t6"},
+  "7": {"family": "scheduling", "function_name": "parse_duration", "dir": "tasks/t7"},
+  "8": {"family": "payments_privacy", "function_name": "mask_card_number", "dir": "tasks/t8"},
+  "9": {"family": "security", "function_name": "validate_password", "dir": "tasks/t9"}
+}
