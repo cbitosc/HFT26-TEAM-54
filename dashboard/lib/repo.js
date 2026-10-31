@@ -2,12 +2,26 @@
 // The dashboard never writes anything; it only reads files from the repo root.
 import fs from "node:fs";
 import path from "node:path";
+import { keccak256 } from "viem";
+import { runPhase } from "@/lib/model";
 
 // dashboard/ lives inside the repo, so the repo root is one folder up.
 export const ROOT = process.env.REPO_ROOT || path.resolve(process.cwd(), "..");
 const SOURCES = ["runs", "backup"]; // backup/ = the saved demo run (PLAN.md 2, fallback)
 const EXAMPLES = path.join(ROOT, "schemas", "examples");
 const SAFE_ID = /^[A-Za-z0-9._-]+$/;
+// BN254 field prime (PLAN.md 3.1). snapshot_hash = keccak(raw run.json bytes) mod P (PLAN.md 3.2).
+const P = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
+
+// Computed from the run.json bytes on disk, never copied from the run's own receipt or proof,
+// so it can be compared honestly with the snapshotHash stored on-chain.
+function snapshotHashOf(file) {
+  try {
+    return (BigInt(keccak256(new Uint8Array(fs.readFileSync(file)))) % P).toString();
+  } catch {
+    return null;
+  }
+}
 
 export function readJson(file) {
   try {
@@ -46,8 +60,16 @@ function mtime(file) {
 
 // run_id = t<task>-<YYYYMMDD-HHMMSS>-<A|B>
 function parseRunId(id) {
-  const m = /^t(\d+)-(\d{8})-(\d{6})-([AB])$/.exec(id);
-  return m ? { task_id: Number(m[1]), agent: m[4] } : { task_id: null, agent: null };
+  const m = /^t(\d+)-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-([AB])$/.exec(id);
+  if (!m) return { task_id: null, agent: null, started: null };
+  // The run id timestamp is UTC (same clock as events.jsonl "ts"); the browser shows it in local time.
+  return { task_id: Number(m[1]), agent: m[8], started: `${m[2]}-${m[3]}-${m[4]}T${m[5]}:${m[6]}:${m[7]}Z` };
+}
+
+// tasks/tasks.json: task number -> function name (e.g. 3 -> extract_fields). Read, never hard-coded.
+function taskFunctions() {
+  const t = readJson(path.join(ROOT, "tasks", "tasks.json")) || {};
+  return Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v?.function_name || null]));
 }
 
 // Each run folder is { id, source, dir }. Examples are used only while no real run exists.
@@ -122,7 +144,22 @@ function loadFolder(folder) {
     events: readJsonl(p("events")),
   };
   const updated = Math.max(...Object.keys(names).map((k) => mtime(p(k))));
-  return { id: folder.id, source: folder.source, updated, ...files };
+  const eventsUpdated = mtime(p("events"));
+  const last = files.events[files.events.length - 1] || null;
+  return {
+    id: folder.id,
+    source: folder.source,
+    updated,
+    ...files,
+    // Facts the page needs to label the run honestly (see lib/model.js runState):
+    snapshot_hash: files.run ? snapshotHashOf(p("run")) : null,
+    cid: files.receipt?.cid || null,
+    has_receipt: !!files.receipt,
+    events_updated: eventsUpdated,
+    run_done: files.events.some((e) => e.step === "run_done"),
+    phase: runPhase({ events: files.events, events_updated: eventsUpdated }),
+    current_step: last?.step || null,
+  };
 }
 
 function allFolders() {
@@ -146,25 +183,41 @@ function summarise(r) {
     const v1 = events.find((e) => e.v === 1 && e.step === "evaluate");
     if (v1) scores[0] = v1.score;
   }
+  const taskId = run.task_id ?? fromId.task_id;
+  // A "mock" run used canned answers, not a real model (run.json models.generator starts with "mock/",
+  // or, before run.json exists, the first event says "MOCK LLM"). Practice runs, never real results.
+  const generator = run.models?.generator || null;
+  const mock = generator ? generator.startsWith("mock") : /MOCK LLM/.test(events[0]?.msg || "");
   return {
     id: r.id,
     source: r.source,
     updated: r.updated,
-    task_id: run.task_id ?? fromId.task_id,
+    started: fromId.started,
+    mock,
+    generator,
+    function_name: taskFunctions()[String(taskId)] || null,
+    task_id: taskId,
     agent: run.agent ?? fromId.agent,
-    status: run.status || (errored ? "error" : events.length ? "running" : "empty"),
+    status: run.status || (r.phase === "live" ? "running" : errored ? "error" : events.length ? "incomplete" : "empty"),
     scores,
     uses_memory: (run.memory_used || []).length > 0,
     example: r.source === "example",
-    // Example files contain a fake receipt: never show them as signed / proved / on-chain.
+    // Example files contain a fake receipt: never show them as signed / proved.
+    // "On-chain" is NOT decided here: the page matches snapshot_hash against /api/chain.
     steps: {
       run: !!r.run,
       signed: r.source !== "example" && !!r.evaluator,
       proved: r.source !== "example" && !!r.proof,
-      onchain: r.source !== "example" && !!r.receipt,
     },
     error: errored,
     last_event: last,
+    snapshot_hash: r.snapshot_hash,
+    cid: r.cid,
+    has_receipt: r.has_receipt,
+    events_updated: r.events_updated,
+    run_done: r.run_done,
+    phase: r.phase,
+    current_step: r.current_step,
   };
 }
 
@@ -195,6 +248,56 @@ export function getExtras() {
     cheats: pick("cheats.json"),
     cheat_events: cheatEvents.length ? cheatEvents : readJsonl(path.join(ROOT, "backup", "cheats.events.jsonl")),
   };
+}
+
+// ---------- Overview tab (read-only; getExtras above is unchanged) ----------
+
+// cheats.json + cheats.events.jsonl from ONE folder (runs/ first, else backup/), and where they came from.
+export function getCheatsWithSource() {
+  for (const source of ["runs", "backup"]) {
+    const file = path.join(ROOT, source, "cheats.json");
+    const data = readJson(file);
+    if (!data) continue;
+    const events = readJsonl(path.join(ROOT, source, "cheats.events.jsonl"));
+    return { data, events, source, file_updated: mtime(file) || null };
+  }
+  return { data: null, events: [], source: null, file_updated: null };
+}
+
+// Memory-verification lines the agent may log, e.g. "memory: record 1 VERIFIED (...)"
+// or "record #0 VERIFIED (IPFS bytes match on-chain snapshotHash)". Only these count as proof.
+const MEMORY_VERIFIED = /record #?(\d+) VERIFIED/;
+
+// Runs whose run.json has memory_used, newest first, with the verification events found for each record.
+// Uses the same folder filters as the run list (cheat / empty / corrupt folders are ignored).
+export function getMemoryRuns() {
+  const out = [];
+  for (const f of allFolders()) {
+    if (f.source === "example") continue;
+    try {
+      const r = loadFolder(f);
+      const used = r.run?.memory_used;
+      if (!Array.isArray(used) || !used.length) continue;
+      const verified = {};
+      for (const e of r.events) {
+        const m = MEMORY_VERIFIED.exec(e.msg || "");
+        if (m) verified[m[1]] = e;
+      }
+      out.push({
+        id: r.id,
+        source: r.source,
+        updated: r.updated,
+        task_id: r.run.task_id ?? null,
+        agent: r.run.agent ?? null,
+        agent_wallet: r.run.agent_wallet ?? null,
+        memory_used: used,
+        verification_events: verified, // record_id -> event, empty when nothing was logged
+      });
+    } catch {
+      // one bad folder must not break the overview
+    }
+  }
+  return out.sort((a, b) => b.updated - a.updated);
 }
 
 // schemas/deployments.<CHAIN>.json (P3) and the registry ABI. Never hardcode addresses (PLAN.md 3.1).

@@ -71,13 +71,24 @@ export const STATUS_TONE = {
   failed_no_improvement: "red",
   too_easy: "amber",
   running: "blue",
+  incomplete: "amber",
   error: "red",
   empty: "gray",
 };
 
+const STATUS_LABEL = {
+  failed_no_improvement: ["stopped early", "A revision did not score strictly higher than the previous version, so the run could not reach three rising versions."],
+  too_easy: ["too easy", "The first version already passed, so there was nothing to improve."],
+  improved: ["improved", "Three versions, each scoring strictly higher than the last."],
+};
+
 export function StatusBadge({ status }) {
-  const label = { failed_no_improvement: "no improvement", too_easy: "too easy" }[status] || status;
-  return <Badge tone={STATUS_TONE[status] || "gray"}>{label}</Badge>;
+  const [label, title] = STATUS_LABEL[status] || [status, undefined];
+  return (
+    <Badge tone={STATUS_TONE[status] || "gray"} title={title}>
+      {label}
+    </Badge>
+  );
 }
 
 // A neumorphic toggle button: raised normally, pressed when active.

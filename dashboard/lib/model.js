@@ -33,7 +33,7 @@ export function deriveVersions(detail) {
     let status = "pending";
     if (accepted) status = "done";
     else if (done) status = failed ? "rejected" : "skipped"; // e.g. too_easy stops after V1
-    else if (!done && (versions[n - 2]?.status === "done" || n === 1)) status = "running";
+    else if (detail.phase === "live" && (versions[n - 2]?.status === "done" || n === 1)) status = "running";
 
     versions.push({
       v: n,
@@ -70,12 +70,13 @@ export function deriveSteps(detail) {
     { key: "sign", label: "Evaluator signs", done: !!detail.evaluator || !!has("sign"), actor: "evaluator" },
     { key: "prove", label: "ZK proof", done: !!detail.proof || !!has("prove"), actor: "prover" },
     { key: "upload", label: "IPFS upload", done: !!detail.receipt?.cid || !!has("upload"), actor: "pipeline" },
-    { key: "submit", label: "On-chain verify + reward", done: !!detail.receipt || !!has("verified"), actor: "pipeline" },
+    { key: "submit", label: "On-chain verify + reward", done: !!detail.chainRecord, actor: "pipeline" },
   ];
-  const live = isLive(detail);
+  const live = pipelineActive(detail);
   let firstOpen = true;
   for (const s of steps) {
     s.event = [...events].reverse().find((e) => e.step === s.key || (s.key === "submit" && e.step === "verified"));
+    if (s.key === "submit" && detail.chainRecord) s.event = { msg: `record #${detail.chainRecord.record_id} on-chain` };
     if (detail.source === "example") {
       s.status = "skipped"; // schemas/examples has a fake receipt; never draw it as done
       s.error = "example data, not real";
@@ -89,6 +90,9 @@ export function deriveSteps(detail) {
     if (notImproved) s.status = "skipped";
     else s.status = err ? "error" : firstOpen && detail.run && live ? "running" : "pending";
     if (err) s.error = err.msg;
+    // A local receipt or "verified" event is not proof: say what is missing.
+    if (s.key === "submit" && !err && (detail.has_receipt || has("verified")))
+      s.error = detail.chainOk === false ? "cannot check: chain offline" : "no matching on-chain record";
     firstOpen = false;
   }
   return steps;
@@ -107,8 +111,44 @@ export function criticThinking(detail) {
   return { v: last.v, model: last.msg.split(" is reviewing ")[0], since };
 }
 
+// LIVE = the agent loop is still running: no run_done event yet, and events.jsonl changed in the
+// last 2 minutes (or the critic is still reasoning). Used on the server (lib/repo.js) per run.
+export function runPhase({ events, events_updated }) {
+  if (!events.length) return "empty";
+  if (events.some((e) => e.step === "run_done")) return "done";
+  const last = events[events.length - 1];
+  const reviewing =
+    last.step === "critique" && / is reviewing /.test(last.msg || "") && Date.now() - Date.parse(last.ts) < THINKING_MS;
+  return reviewing || Date.now() - (events_updated || 0) < LIVE_MS ? "live" : "stalled";
+}
+
 export function isLive(detail) {
-  return Date.now() - (detail.updated || 0) < LIVE_MS || !!criticThinking(detail);
+  return detail.phase === "live";
+}
+
+// After run_done, sign / prove / upload / submit may still be appending events (pipeline.run_all).
+export function pipelineActive(detail) {
+  return detail.phase === "done" && !detail.chainRecord && Date.now() - (detail.events_updated || 0) < LIVE_MS;
+}
+
+// The on-chain record for this run, or null. A match needs the snapshot_hash computed from this
+// run's own run.json bytes, and the CID too when the run has a receipt. Nothing else counts.
+export function chainMatch(item, chain) {
+  if (!chain?.ok || !item?.snapshot_hash || item.source === "example") return null;
+  return (
+    chain.records.find((r) => r.snapshot_hash === item.snapshot_hash && (!item.cid || r.cid === item.cid)) || null
+  );
+}
+
+// One honest state per run: example | verified | live | stalled | unconfirmed | not_submitted
+export function runState(item, chain) {
+  if (item.source === "example") return { key: "example" };
+  const record = chainMatch(item, chain);
+  if (record) return { key: "verified", record };
+  if (item.phase === "live") return { key: "live", step: item.current_step };
+  if (item.phase !== "done") return { key: "stalled" };
+  if (item.has_receipt) return { key: "unconfirmed", offline: !chain?.ok };
+  return { key: "not_submitted" };
 }
 
 export function elapsed(since) {
