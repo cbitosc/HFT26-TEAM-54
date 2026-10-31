@@ -1,0 +1,179 @@
+{
+  "task_id": 5,
+  "family": "data_cleaning",
+  "function_name": "parse_csv_line",
+  "cases": [
+    {
+      "id": "core_1",
+      "category": "core",
+      "args": [
+        "a,b,c"
+      ],
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "id": "core_2",
+      "category": "core",
+      "args": [
+        "name,age,city"
+      ],
+      "expected": [
+        "name",
+        "age",
+        "city"
+      ]
+    },
+    {
+      "id": "core_3",
+      "category": "core",
+      "args": [
+        "1,2,3"
+      ],
+      "expected": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "id": "core_4",
+      "category": "core",
+      "args": [
+        "x,\"hello, world\",y"
+      ],
+      "expected": [
+        "x",
+        "hello, world",
+        "y"
+      ]
+    },
+    {
+      "id": "core_5",
+      "category": "core",
+      "args": [
+        "a,,c"
+      ],
+      "expected": [
+        "a",
+        "",
+        "c"
+      ]
+    },
+    {
+      "id": "core_6",
+      "category": "core",
+      "args": [
+        "single"
+      ],
+      "expected": [
+        "single"
+      ]
+    },
+    {
+      "id": "core_7",
+      "category": "core",
+      "args": [
+        " a , b ,\tc "
+      ],
+      "expected": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "id": "core_8",
+      "category": "core",
+      "args": [
+        "a,b\n"
+      ],
+      "expected": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "id": "edge_1",
+      "category": "edge",
+      "args": [
+        ""
+      ],
+      "expected": []
+    },
+    {
+      "id": "edge_2",
+      "category": "edge",
+      "args": [
+        "\"say \"\"hi\"\"\",x"
+      ],
+      "expected": [
+        "say \"hi\"",
+        "x"
+      ]
+    },
+    {
+      "id": "edge_3",
+      "category": "edge",
+      "args": [
+        "\"unclosed,a"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_4",
+      "category": "edge",
+      "args": [
+        "a,\"b\"c"
+      ],
+      "expected": null
+    },
+    {
+      "id": "edge_5",
+      "category": "edge",
+      "args": [
+        ","
+      ],
+      "expected": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "edge_6",
+      "category": "edge",
+      "args": [
+        "  \"  padded  \"  ,z"
+      ],
+      "expected": [
+        "  padded  ",
+        "z"
+      ]
+    },
+    {
+      "id": "edge_7",
+      "category": "edge",
+      "args": [
+        "a,b\r\n"
+      ],
+      "expected": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "id": "edge_8",
+      "category": "edge",
+      "args": [
+        "\"\",x"
+      ],
+      "expected": [
+        "",
+        "x"
+      ]
+    }
+  ]
+}
