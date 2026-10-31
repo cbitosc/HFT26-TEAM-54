@@ -145,7 +145,14 @@ Chain and addresses are never hardcoded: they come from `.env` (`CHAIN`) and `sc
 
 ## Team
 
-Team Coding Brigaders (TEAM-54). Roles and per-role explanations: [docs/roles/](docs/roles/) and [docs/explain/](docs/explain/). Team members are listed below.
+Team Coding Brigaders (TEAM-54). Team members are listed below. Each role has a plain-English explanation in [docs/explain/](docs/explain/) and its full brief in [docs/roles/](docs/roles/).
+
+**Who built what**
+
+- **Agent engineer (P1):** the generate-critique-revise loop with two separate open-weight models, the sandboxed evaluator that turns hidden-test results into the 4 metrics, the 9 tasks with hidden tests (1-4 frozen on-chain), Agent B (reads on-chain memory) and the benchmark. Details: [docs/explain/p1.md](docs/explain/p1.md).
+- **ZK + attestation (P2):** a Circom/Groth16 circuit proves metrics are in range, scores use fixed weights and strictly rise V1<V2<V3, and the prover knows the secret prompt behind a public commitment; the contract verifies it on-chain. A separate evaluator re-runs the hidden tests and signs only the numbers it reproduces (`attest/sign.py`). `bash zk/run_cheats_local.sh` rehearses 5 cheating attacks on local Anvil, and `CHAIN=sepolia node zk/cheat_demo.js` re-runs them read-only against Sepolia (0 transactions). Details: [docs/explain/p2.md](docs/explain/p2.md).
+- **Integrator, contracts, repo (P3):** `AutoEvolveRegistry.sol` (7 ordered checks, 24 Foundry tests), the Sepolia deployment, the IPFS upload/fetch, `pipeline.submit` and `pipeline.run_all`, shared hashing rules, and the merges.
+- **Dashboard and demo (P4):** the live developer dashboard (runs, execution tree, diffs, proof, on-chain log, benchmark, cheats) and the demo script. Details: [docs/explain/p4.md](docs/explain/p4.md).
 
 ---
 
