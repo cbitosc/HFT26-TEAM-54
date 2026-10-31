@@ -3,7 +3,7 @@
 // then sign -> prove -> upload -> on-chain verify (from events.jsonl + files).
 // Animations: boxes slide in one by one, finished roads flow with a travelling dot,
 // the running box glows, a box pops when it completes, rejected attempts shake.
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ReactFlow, Handle, Position, Background, getSmoothStepPath } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { deriveVersions, deriveSteps, criticThinking, elapsed } from "@/lib/model";
@@ -36,6 +36,16 @@ const INK = {
 };
 const ICON = { done: "✓", rejected: "✗", error: "✗", memory: "◆" };
 
+// "critic reviewing V1 · 0m 29s": ticks by itself every second, outside the node data.
+function Reviewing({ v, since }) {
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => tick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return `critic reviewing V${v} · ${elapsed(since)}`;
+}
+
 function StepNode({ data }) {
   return (
     <div className="tree-node" style={{ "--delay": `${data.index * 80}ms` }}>
@@ -53,6 +63,11 @@ function StepNode({ data }) {
             {data.status === "running" ? <Spinner /> : ICON[data.status]} {data.score != null ? data.score : ""}
           </span>
         </div>
+        {data.reviewing && (
+          <div className="truncate text-[11px] leading-4 text-gray-600 dark:text-gray-400">
+            <Reviewing v={data.reviewing.v} since={data.reviewing.since} />
+          </div>
+        )}
         {data.lines?.map((l, i) => (
           <div key={i} className="truncate text-[11px] leading-4 text-gray-600 dark:text-gray-400" title={l}>
             {l}
@@ -135,9 +150,10 @@ function buildGraph(detail) {
       title: `V${v.v}`,
       status: v.status,
       score: v.score,
+      reviewing: reviewing ? { v: thinking.v, since: thinking.since } : null,
       lines: [
         reviewing
-          ? `critic reviewing V${thinking.v} · ${elapsed(thinking.since)}`
+          ? null
           : m
             ? `tests ${m[0]} · edge ${m[1]} · lint ${m[2]} · simp ${m[3]}`
             : v.status === "running"
@@ -205,7 +221,17 @@ function Progress({ versions, steps }) {
 }
 
 export default function ExecTree({ detail, dark }) {
-  const { nodes, edges, versions, steps } = useMemo(() => buildGraph(detail), [detail]);
+  // The page re-renders on every poll and gives us a fresh `detail` object each time. If we passed
+  // React Flow fresh node objects every time, it would forget their measured size and hide the boxes
+  // (the tree flashed and went blank). So build the graph, and keep the previous one unless the
+  // drawn content (not object identity) changed.
+  const built = buildGraph(detail);
+  const signature = JSON.stringify([
+    built.nodes.map((n) => [n.id, n.position, n.data]),
+    built.edges.map((e) => [e.id, e.sourceHandle, e.targetHandle, e.data]),
+  ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { nodes, edges, versions, steps } = useMemo(() => built, [signature]);
   return (
     <div>
       <Progress versions={versions} steps={steps} />
