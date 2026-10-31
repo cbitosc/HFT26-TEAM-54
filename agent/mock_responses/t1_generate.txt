@@ -1,0 +1,19 @@
+```python
+import re
+
+LEVELS = {"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"}
+PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \[(\w+)\] (.*)$")
+
+
+def parse_log_line(line: str) -> dict | None:
+    if not isinstance(line, str):
+        return None
+    match = PATTERN.match(line.strip())
+    if not match:
+        return None
+    date, time, level, message = match.groups()
+    level = level.upper().replace("WARNING", "WARN")
+    if level not in LEVELS:
+        return None
+    return {"date": date, "time": time, "level": level, "message": message.strip()}
+```

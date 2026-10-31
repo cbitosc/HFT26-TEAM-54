@@ -1,0 +1,23 @@
+{
+  "task_id": 1,
+  "family": "log_parsing",
+  "function_name": "parse_log_line",
+  "cases": [
+    {"id": "core_1", "category": "core", "args": ["2024-03-01 12:00:01 [INFO] Server started"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "INFO", "message": "Server started"}},
+    {"id": "core_2", "category": "core", "args": ["2024-03-01 12:00:05 [ERROR] Disk full on /dev/sda1"], "expected": {"date": "2024-03-01", "time": "12:00:05", "level": "ERROR", "message": "Disk full on /dev/sda1"}},
+    {"id": "core_3", "category": "core", "args": ["2023-12-31 23:59:59 [DEBUG] cache miss key=user:42"], "expected": {"date": "2023-12-31", "time": "23:59:59", "level": "DEBUG", "message": "cache miss key=user:42"}},
+    {"id": "core_4", "category": "core", "args": ["2024-01-15 08:30:00 [WARN] High memory usage: 91%"], "expected": {"date": "2024-01-15", "time": "08:30:00", "level": "WARN", "message": "High memory usage: 91%"}},
+    {"id": "core_5", "category": "core", "args": ["2024-02-29 00:00:00 [CRITICAL] Power failure"], "expected": {"date": "2024-02-29", "time": "00:00:00", "level": "CRITICAL", "message": "Power failure"}},
+    {"id": "core_6", "category": "core", "args": ["2024-03-01 12:00:01 [INFO] café ☕ prêt"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "INFO", "message": "café ☕ prêt"}},
+    {"id": "core_7", "category": "core", "args": ["not a log line"], "expected": null},
+    {"id": "core_8", "category": "core", "args": ["2024-03-01 12:00:01 Server started"], "expected": null},
+    {"id": "edge_1", "category": "edge", "args": [""], "expected": null},
+    {"id": "edge_2", "category": "edge", "args": ["\t 2024-03-01\t12:00:01  [info]   User logged in  \r\n"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "INFO", "message": "User logged in"}},
+    {"id": "edge_3", "category": "edge", "args": ["2024-03-01 12:00:01 [Warning] Low disk"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "WARN", "message": "Low disk"}},
+    {"id": "edge_4", "category": "edge", "args": ["2024-03-01 12:00:01 [ error ] Timeout"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "ERROR", "message": "Timeout"}},
+    {"id": "edge_5", "category": "edge", "args": ["2024-03-01 24:00:00 [INFO] Bad hour"], "expected": null},
+    {"id": "edge_6", "category": "edge", "args": ["2024-03-01 12:00:01 [TRACE] Too verbose"], "expected": null},
+    {"id": "edge_7", "category": "edge", "args": ["2024-03-01 12:00:01 [INFO]"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "INFO", "message": ""}},
+    {"id": "edge_8", "category": "edge", "args": ["2024-03-01 12:00:01 [INFO] got [3]  items"], "expected": {"date": "2024-03-01", "time": "12:00:01", "level": "INFO", "message": "got [3]  items"}}
+  ]
+}

@@ -1,0 +1,7 @@
+# Force LF everywhere: we hash raw file bytes (tests.json, run.json), so CRLF would change the hashes.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.wasm binary
+*.zkey binary
+*.ptau binary
