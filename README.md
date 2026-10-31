@@ -156,7 +156,7 @@ Team Coding Brigaders (TEAM-54). Roles and per-role explanations: [docs/roles/](
 | **Team Name** | **Coding Brigaders** |
 | **Team Number** | `TEAM-54` (`HFT26-TEAM-54`) |
 | **Registration ID** | `HFEST26-NWESBTK5` |
-| **Problem Track** | **Track Selection in Progress** |
+| **Problem Track** | **Decentralized, ZK-Attested Self-Improving Agent with Immutable Cross-Agent Memory** |
 | **Domain** | `General Track` |
 | **Team Leader** | Thaswik PLV (thaswik1011@gmail.com) |
 | **Institution** | CBIT |
@@ -173,7 +173,7 @@ Team Coding Brigaders (TEAM-54). Roles and per-role explanations: [docs/roles/](
 
 ## 🎯 Problem Statement
 
-### **TDecentralized, ZK-Attested Self-Improving Agent with Immutable Cross-Agent Memory
+### **Decentralized, ZK-Attested Self-Improving Agent with Immutable Cross-Agent Memory
 **
 *Domain:* **Agentic AI, Zero-Knowledge Cryptography & Decentralized Infrastructure**
 
